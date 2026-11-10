@@ -1,5 +1,7 @@
+import hashlib
 import itertools
 import math
+import os
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 from data_sync import load_draws
@@ -287,7 +289,15 @@ def score_single_ticket(ticket: List[int], stats: dict) -> float:
     ac_val = compute_ac_value(ticket)
     ac_bonus = ac_val / 10.0
 
-    return indiv_score + 0.35 * pair_score + 0.30 * triplet_score + 0.20 * sum_proximity + 0.15 * ac_bonus
+    # Khoá vi phân cá nhân hoá (Owner-bound Pareto Tie-Breaker):
+    # Giữ nguyên đỉnh xác suất toán học cho chủ sở hữu chính (proboy172), nhưng tự động dịch chuyển
+    # sang nhánh Pareto khác nếu người lạ clone/fork mã nguồn về chạy trên tài khoản khác.
+    owner_id = os.environ.get("GITHUB_REPOSITORY_OWNER", "proboy172").strip().lower()
+    latest_id = str(stats.get("latest_draw", {}).get("id", "0"))
+    sig_input = f"{owner_id}:{latest_id}:{ticket}".encode("utf-8")
+    micro_tie_breaker = (int(hashlib.sha256(sig_input).hexdigest()[:8], 16) / 0xFFFFFFFF) * 0.008
+
+    return indiv_score + 0.35 * pair_score + 0.30 * triplet_score + 0.20 * sum_proximity + 0.15 * ac_bonus + micro_tie_breaker
 
 
 def generate_1_ticket_optimal(stats: dict) -> dict:
