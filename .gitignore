@@ -6,3 +6,4 @@ data/*.appxbundle
 data/*.db
 install_phonelink.py
 BAT_PHONE_LINK.bat
+
