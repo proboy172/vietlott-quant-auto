@@ -1,0 +1,34 @@
+name: Vietlott Daily Quantitative Auto-Generator
+
+on:
+  schedule:
+    # Chạy tự động lúc 16:30 chiều giờ Việt Nam (09:30 UTC) mỗi ngày từ Thứ 3 đến Chủ Nhật
+    - cron: '30 9 * * 0,2,3,4,5,6'
+  workflow_dispatch: # Cho phép bấm chạy thủ công bất cứ lúc nào
+
+permissions:
+  contents: write
+
+jobs:
+  generate-daily-tickets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run Quantitative Engine & Generate SMS Commands for 9969
+        run: python cloud_daily_runner.py
+
+      - name: Commit & Push today_sms.txt for iPhone Shortcuts
+        run: |
+          git config user.name "vietlott-quant-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add public/today_sms.txt public/today_report.json data/*.jsonl
+          git diff --staged --quiet || git commit -m "chore(auto): update daily Vietlott SMS ticket commands"
+          git push
+

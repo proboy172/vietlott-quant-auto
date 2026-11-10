@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-10",
+  "status": "ACTIVE_BUY",
+  "game_code": "655",
+  "game_name": "Power 6/55",
+  "detected_jackpot_billion": 45.27,
+  "high_jackpot_threshold_billion": 100.0,
+  "is_high_jackpot": false,
+  "selected_mode": "SINGLE_1_TICKET (Chế độ 1 Vé Đơn - Ngân sách 10.000đ)",
+  "total_cost_vnd": 10000,
+  "sms_commands": [
+    "655 K1 S 07 11 18 24 41 55"
+  ],
+  "tickets_detail": [
+    {
+      "ticket_index": 1,
+      "numbers": [
+        7,
+        11,
+        18,
+        24,
+        41,
+        55
+      ],
+      "formatted": "07 11 18 24 41 55",
+      "quant_score": 7.409,
+      "metrics": {
+        "sum": 156,
+        "odd_even": "4:2",
+        "low_high": "4:2",
+        "ac_value": 9,
+        "anti_crowd_gt31": 2,
+        "decades": 5,
+        "consec_pairs": 0
+      },
+      "sms": "655 K1 S 07 11 18 24 41 55"
+    }
+  ],
+  "output_sms_file": "C:\\Users\\admin\\.gemini\\antigravity\\scratch\\vietlott-quant-auto\\public\\today_sms.txt"
+}
