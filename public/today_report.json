@@ -9,31 +9,31 @@
   "selected_mode": "SINGLE_1_TICKET (Chế độ 1 Vé Đơn - Ngân sách 10.000đ)",
   "total_cost_vnd": 10000,
   "sms_commands": [
-    "655 K1 S 07 11 18 24 41 55"
+    "655 K1 S 11 18 20 24 41 53"
   ],
   "tickets_detail": [
     {
       "ticket_index": 1,
       "numbers": [
-        7,
         11,
         18,
+        20,
         24,
         41,
-        55
+        53
       ],
-      "formatted": "07 11 18 24 41 55",
-      "quant_score": 7.409,
+      "formatted": "11 18 20 24 41 53",
+      "quant_score": 8.2894,
       "metrics": {
-        "sum": 156,
-        "odd_even": "4:2",
+        "sum": 167,
+        "odd_even": "3:3",
         "low_high": "4:2",
-        "ac_value": 9,
+        "ac_value": 10,
         "anti_crowd_gt31": 2,
-        "decades": 5,
+        "decades": 4,
         "consec_pairs": 0
       },
-      "sms": "655 K1 S 07 11 18 24 41 55"
+      "sms": "655 K1 S 11 18 20 24 41 53"
     }
   ],
   "output_sms_file": "C:\\Users\\admin\\.gemini\\antigravity\\scratch\\vietlott-quant-auto\\public\\today_sms.txt"
