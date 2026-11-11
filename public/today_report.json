@@ -1,40 +1,40 @@
 {
-  "date": "2026-11-11",
+  "date": "2026-11-12",
   "status": "ACTIVE_BUY",
-  "game_code": "645",
-  "game_name": "Mega 6/45",
-  "detected_jackpot_billion": 15.74,
-  "high_jackpot_threshold_billion": 55.0,
+  "game_code": "655",
+  "game_name": "Power 6/55",
+  "detected_jackpot_billion": 30.0,
+  "high_jackpot_threshold_billion": 100.0,
   "is_high_jackpot": false,
   "selected_mode": "SINGLE_1_TICKET (Chế độ 1 Vé Đơn - Ngân sách 10.000đ)",
   "total_cost_vnd": 10000,
   "sms_commands": [
-    "645 K1 S 09 10 20 22 36 41"
+    "655 K1 S 07 09 18 31 38 41"
   ],
   "tickets_detail": [
     {
       "ticket_index": 1,
       "numbers": [
+        7,
         9,
-        10,
-        20,
-        22,
-        36,
+        18,
+        31,
+        38,
         41
       ],
-      "formatted": "09 10 20 22 36 41",
-      "quant_score": 8.3006,
+      "formatted": "07 09 18 31 38 41",
+      "quant_score": 8.2246,
       "metrics": {
-        "sum": 138,
-        "odd_even": "2:4",
-        "low_high": "4:2",
+        "sum": 144,
+        "odd_even": "4:2",
+        "low_high": "3:3",
         "ac_value": 10,
         "anti_crowd_gt31": 2,
-        "decades": 5,
-        "consec_pairs": 1
+        "decades": 4,
+        "consec_pairs": 0
       },
-      "sms": "645 K1 S 09 10 20 22 36 41"
+      "sms": "655 K1 S 07 09 18 31 38 41"
     }
   ],
-  "output_sms_file": "C:\\Users\\admin\\.gemini\\antigravity\\scratch\\vietlott-quant-auto\\public\\today_sms.txt"
+  "output_sms_file": "/home/runner/work/vietlott-quant-auto/vietlott-quant-auto/public/today_sms.txt"
 }
