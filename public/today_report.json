@@ -1,39 +1,39 @@
 {
-  "date": "2026-11-13",
+  "date": "2026-11-14",
   "status": "ACTIVE_BUY",
-  "game_code": "645",
-  "game_name": "Mega 6/45",
-  "detected_jackpot_billion": 12.0,
-  "high_jackpot_threshold_billion": 55.0,
+  "game_code": "655",
+  "game_name": "Power 6/55",
+  "detected_jackpot_billion": 30.0,
+  "high_jackpot_threshold_billion": 100.0,
   "is_high_jackpot": false,
   "selected_mode": "SINGLE_1_TICKET (Chế độ 1 Vé Đơn - Ngân sách 10.000đ)",
   "total_cost_vnd": 10000,
   "sms_commands": [
-    "645 K1 S 09 11 14 22 40 41"
+    "655 K1 S 07 18 22 31 34 41"
   ],
   "tickets_detail": [
     {
       "ticket_index": 1,
       "numbers": [
-        9,
-        11,
-        14,
+        7,
+        18,
         22,
-        40,
+        31,
+        34,
         41
       ],
-      "formatted": "09 11 14 22 40 41",
-      "quant_score": 8.3186,
+      "formatted": "07 18 22 31 34 41",
+      "quant_score": 8.4582,
       "metrics": {
-        "sum": 137,
+        "sum": 153,
         "odd_even": "3:3",
-        "low_high": "4:2",
+        "low_high": "3:3",
         "ac_value": 10,
         "anti_crowd_gt31": 2,
-        "decades": 4,
-        "consec_pairs": 1
+        "decades": 5,
+        "consec_pairs": 0
       },
-      "sms": "645 K1 S 09 11 14 22 40 41"
+      "sms": "655 K1 S 07 18 22 31 34 41"
     }
   ],
   "output_sms_file": "/home/runner/work/vietlott-quant-auto/vietlott-quant-auto/public/today_sms.txt"
