@@ -2,8 +2,9 @@ name: Vietlott Daily Quantitative Auto-Generator
 
 on:
   schedule:
-    # Chạy tự động lúc 16:30 chiều giờ Việt Nam (09:30 UTC) MỖI NGÀY TRONG TUẦN (Thứ 2 đến Chủ Nhật)
-    - cron: '30 9 * * *'
+    # Chạy tự động lúc 12:00 TRƯA giờ VN (05:00 UTC) MỖI NGÀY TRONG TUẦN (Thứ 2 đến CN)
+    # Giúp có sẵn số từ sớm, iPhone chạy lúc 12:05 hoặc 14:00 thảnh thơi, không bao giờ lo sát giờ 17:45 đóng cổng
+    - cron: '0 5 * * *'
   workflow_dispatch: # Cho phép bấm chạy thủ công bất cứ lúc nào
 
 permissions:
