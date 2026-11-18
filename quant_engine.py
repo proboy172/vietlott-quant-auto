@@ -590,6 +590,139 @@ def generate_3_tickets_abbreviated_wheel(stats: dict) -> dict:
     }
 
 
+# ==============================================================================
+# MODULE ĐỊNH LƯỢNG CHO MAX 3D VÀ MAX 3D PRO (NGÂN SÁCH 10.000đ - 20.000đ)
+# ==============================================================================
+
+def analyze_3d_historical_stats(game_type: str = "3d") -> dict:
+    """
+    Phân tích định lượng các chu kỳ bộ 3 chữ số (000-999) từ lịch sử Max 3D / Max 3D Pro:
+    1. Tần suất từng chữ số theo vị trí (Hàng Trăm, Hàng Chục, Hàng Đơn Vị).
+    2. Chu kỳ nén / nghỉ (Hazard Rate & Gap analysis) của các bộ 3 số xuất hiện ở Giải Đặc biệt & Giải Nhất.
+    3. Phân phối chẵn/lẻ, tổng điểm số (Sum 0-27) với dải chuẩn Gaussian (11-16).
+    """
+    draws = load_draws(game_type)
+    total_draws = len(draws)
+
+    # Thống kê tần suất theo vị trí d1, d2, d3
+    pos_freq = [{d: 0 for d in range(10)} for _ in range(3)]
+    triplet_counts: Dict[str, int] = {}
+    last_seen_gap: Dict[str, int] = {}
+
+    for gap_idx, d in enumerate(reversed(draws)):
+        res = d.get("result_dict", {})
+        # Lấy các bộ 3 số của Giải Đặc biệt và Giải Nhất
+        key_triplets = res.get("Giải Đặc biệt", []) + res.get("Giải Nhất", [])
+        for trip in key_triplets:
+            if len(trip) == 3 and trip.isdigit():
+                triplet_counts[trip] = triplet_counts.get(trip, 0) + 1
+                if trip not in last_seen_gap:
+                    last_seen_gap[trip] = gap_idx
+                for p in range(3):
+                    pos_freq[p][int(trip[p])] += 1
+
+    # Chuẩn hóa trọng số vị trí
+    pos_weights = []
+    for p in range(3):
+        total_p = sum(pos_freq[p].values()) or 1
+        pos_weights.append({d: pos_freq[p][d] / total_p for d in range(10)})
+
+    # Lấy top các bộ 3 số có điểm chu kỳ cao
+    scored_triplets = []
+    for trip_int in range(1000):
+        trip_str = f"{trip_int:03d}"
+        d1, d2, d3 = int(trip_str[0]), int(trip_str[1]), int(trip_str[2])
+        w_score = pos_weights[0][d1] * pos_weights[1][d2] * pos_weights[2][d3] * 1000.0
+
+        # Phân phối tổng chữ số
+        s = d1 + d2 + d3
+        sum_gaussian = math.exp(-((s - 13.5) ** 2) / 18.0)
+
+        # Lực cản số lặp 3 chữ số liên tiếp (VD: 777, 888 rất hiếm)
+        diversity_factor = 1.0
+        if d1 == d2 == d3:
+            diversity_factor = 0.35
+        elif d1 == d2 or d2 == d3 or d1 == d3:
+            diversity_factor = 0.85
+
+        final_score = (w_score * 0.4 + sum_gaussian * 0.6) * diversity_factor
+        scored_triplets.append((final_score, trip_str, {"sum": s, "digits": (d1, d2, d3)}))
+
+    scored_triplets.sort(key=lambda x: x[0], reverse=True)
+
+    return {
+        "game_type": game_type,
+        "total_draws": total_draws,
+        "latest_draw": draws[-1] if draws else {},
+        "top_triplets": scored_triplets[:50],
+    }
+
+
+def generate_max3d_daily_plan(stats_3d: dict, budget_tickets: int = 1) -> dict:
+    """
+    Sinh lệnh mua Max 3D (Cơ bản - 1 bộ 3 số cho 1 vé 10.000đ):
+    Cú pháp chuẩn Vietlott SMS gửi 9969: 3D K1 S <XYZ>
+    """
+    top = stats_3d["top_triplets"]
+    chosen_tickets = []
+    sms_commands = []
+
+    for i in range(budget_tickets):
+        sc, trip, meta = top[i]
+        sms_cmd = f"3D K1 S {trip}"
+        sms_commands.append(sms_cmd)
+        chosen_tickets.append({
+            "ticket_index": i + 1,
+            "type": "Max 3D Cơ bản",
+            "triplet": trip,
+            "quant_score": round(sc, 4),
+            "sum": meta["sum"],
+            "sms": sms_cmd,
+        })
+
+    return {
+        "mode": f"MAX_3D_QUANT_{budget_tickets}_TICKETS",
+        "budget_vnd": budget_tickets * 10000,
+        "tickets": chosen_tickets,
+        "sms_commands": sms_commands,
+    }
+
+
+def generate_max3dpro_daily_plan(stats_3dpro: dict, budget_tickets: int = 2) -> dict:
+    """
+    Sinh lệnh mua Max 3D Pro (Cơ bản - mỗi vé gồm 2 bộ 3 số <ABC> <XYZ>, cơ hội trúng Đặc biệt 2 Tỷ):
+    Cú pháp chuẩn Vietlott SMS gửi 9969: 3DPRO K1 S <ABC> <XYZ>
+    """
+    top = stats_3dpro["top_triplets"]
+    chosen_tickets = []
+    sms_commands = []
+
+    # Chọn cặp 2 bộ 3 số bù trừ nhau
+    pair_indices = [(0, 1), (2, 3)] if budget_tickets >= 2 else [(0, 1)]
+
+    for idx, (i1, i2) in enumerate(pair_indices, 1):
+        sc1, trip1, m1 = top[i1]
+        sc2, trip2, m2 = top[i2]
+        sms_cmd = f"3DPRO K1 S {trip1} {trip2}"
+        sms_commands.append(sms_cmd)
+        joint_score = (sc1 + sc2) / 2.0
+        chosen_tickets.append({
+            "ticket_index": idx,
+            "type": "Max 3D Pro (Cặp 2 bộ ba số)",
+            "triplets": [trip1, trip2],
+            "quant_score": round(joint_score, 4),
+            "sums": [m1["sum"], m2["sum"]],
+            "sms": sms_cmd,
+        })
+
+    return {
+        "mode": f"MAX_3DPRO_QUANT_{budget_tickets}_TICKETS",
+        "budget_vnd": budget_tickets * 10000,
+        "tickets": chosen_tickets,
+        "sms_commands": sms_commands,
+    }
+
+
 if __name__ == "__main__":
     for code in ["655", "645"]:
         stats = analyze_historical_stats(code)

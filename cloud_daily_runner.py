@@ -8,11 +8,14 @@ from data_sync import sync_vietlott_data
 from iphone_automation_server import get_today_game_code
 from quant_engine import (
     GAME_CONFIGS,
+    analyze_3d_historical_stats,
     analyze_historical_stats,
     generate_1_ticket_optimal,
     generate_2_tickets_diversity_optimal,
     generate_3_tickets_abbreviated_wheel,
     generate_dynamic_quant_plan,
+    generate_max3d_daily_plan,
+    generate_max3dpro_daily_plan,
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -75,43 +78,83 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
     sms_txt_path = PUBLIC_DIR / "today_sms.txt"
     report_json_path = PUBLIC_DIR / "today_report.json"
 
-    if game_code is None:
-        # Thứ Hai không có kỳ quay Mega 6/45 hoặc Power 6/55 -> Ghi file rỗng để iPhone không gửi SMS
-        sms_txt_path.write_text("", encoding="utf-8")
-        report = {
-            "date": str(today),
-            "status": "REST_DAY",
-            "message": "Thứ Hai không có lịch quay Mega 6/45 và Power 6/55. iPhone tự động nghỉ.",
-            "sms_commands": [],
-        }
-        report_json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-        return report
+    weekday = today.weekday()
+    all_sms_commands = []
+    tickets_summary = []
+    total_cost_vnd = 0
+    decision_notes = []
 
-    cfg = GAME_CONFIGS[game_code]
-    live_jp = override_jackpot if override_jackpot is not None else fetch_live_jackpot_billion(game_code)
-    stats = analyze_historical_stats(game_code)
+    # 1. PHÂN HỆ MA TRẬN 6 BÓNG (Mega 6/45 hoặc Power 6/55)
+    # Lịch: T3, T5, T7 -> 6/55 | T4, T6, CN -> 6/45 | T2 -> Nghỉ
+    if game_code is not None:
+        cfg = GAME_CONFIGS[game_code]
+        live_jp = override_jackpot if override_jackpot is not None else fetch_live_jackpot_billion(game_code)
+        stats = analyze_historical_stats(game_code)
 
-    # Bộ điều phối ngân sách động 10k - 30k theo phân tích xác suất đỉnh cao (Dynamic Quant Kelly Allocation)
-    plan = generate_dynamic_quant_plan(stats, live_jackpot_billion=live_jp)
-    is_high_jackpot = live_jp >= cfg.jackpot_high_threshold_billion
+        # Bộ điều phối ngân sách động 10k - 30k theo xác suất & Jackpot
+        plan_matrix = generate_dynamic_quant_plan(stats, live_jackpot_billion=live_jp)
+        all_sms_commands.extend(plan_matrix["sms_commands"])
+        for tk in plan_matrix["tickets"]:
+            tickets_summary.append({
+                "game": cfg.name,
+                "detail": tk,
+            })
+        cost_matrix = len(plan_matrix["sms_commands"]) * 10000
+        total_cost_vnd += cost_matrix
+        decision_notes.append(f"[{cfg.name}] {plan_matrix.get('decision_reason', '')} (Chi phí: {cost_matrix:,}đ)")
+    else:
+        cfg = None
+        live_jp = 0.0
+
+    # 2. PHÂN HỆ SỐ HỌC 3D (Max 3D hoặc Max 3D Pro) - Ngân sách 10.000đ - 20.000đ
+    # Lịch quay:
+    # - Thứ 2, Thứ 4, Thứ 6: Max 3D (Thứ 2 mua 2 vé 20k, Thứ 4 & Thứ 6 mua 1-2 vé 10k-20k)
+    # - Thứ 3, Thứ 5, Thứ 7: Max 3D Pro (Săn Đặc biệt 2 Tỷ, ngân sách 1-2 vé 10k-20k)
+    # - Chủ Nhật: Không quay 3D
+    plan_3d = None
+    if weekday in (0, 2, 4):  # Thứ 2, Thứ 4, Thứ 6 -> Max 3D
+        stats_3d = analyze_3d_historical_stats("3d")
+        # Thứ 2 dành ngân sách 20k (2 vé), Thứ 4 & 6 bổ trợ 1 vé (10k)
+        num_3d_tickets = 2 if weekday == 0 else 1
+        plan_3d = generate_max3d_daily_plan(stats_3d, budget_tickets=num_3d_tickets)
+        all_sms_commands.extend(plan_3d["sms_commands"])
+        for tk in plan_3d["tickets"]:
+            tickets_summary.append({
+                "game": "Max 3D",
+                "detail": tk,
+            })
+        cost_3d = plan_3d["budget_vnd"]
+        total_cost_vnd += cost_3d
+        decision_notes.append(f"[Max 3D] Mua {num_3d_tickets} vé ({cost_3d:,}đ) tối ưu tần số vị trí & tổng Gauss.")
+    elif weekday in (1, 3, 5):  # Thứ 3, Thứ 5, Thứ 7 -> Max 3D Pro
+        stats_3dpro = analyze_3d_historical_stats("3d_pro")
+        # Đầu tư 1 vé Max 3D Pro (gồm 2 bộ ba số, 10.000đ) để săn giải Đặc biệt 2 Tỷ
+        num_pro_tickets = 1
+        plan_3d = generate_max3dpro_daily_plan(stats_3dpro, budget_tickets=num_pro_tickets)
+        all_sms_commands.extend(plan_3d["sms_commands"])
+        for tk in plan_3d["tickets"]:
+            tickets_summary.append({
+                "game": "Max 3D Pro",
+                "detail": tk,
+            })
+        cost_3d = plan_3d["budget_vnd"]
+        total_cost_vnd += cost_3d
+        decision_notes.append(f"[Max 3D Pro] Mua {num_pro_tickets} vé ({cost_3d:,}đ) săn giải 2 Tỷ với xác suất nổ gấp 29 lần Power.")
 
     # Ghi danh sách lệnh SMS ra today_sms.txt (mỗi dòng 1 tin nhắn gửi 9969)
-    sms_content = "\n".join(plan["sms_commands"])
+    sms_content = "\n".join(all_sms_commands)
     sms_txt_path.write_text(sms_content, encoding="utf-8")
 
     report = {
         "date": str(today),
-        "status": "ACTIVE_BUY",
-        "game_code": game_code,
-        "game_name": cfg.name,
+        "status": "ACTIVE_BUY" if all_sms_commands else "REST_DAY",
+        "primary_matrix_game": cfg.name if cfg else "Nghỉ quay (Thứ 2)",
         "detected_jackpot_billion": live_jp,
-        "high_jackpot_threshold_billion": cfg.jackpot_high_threshold_billion,
-        "is_high_jackpot": is_high_jackpot,
-        "selected_mode": plan["mode"],
-        "budget_decision_reason": plan.get("decision_reason", ""),
-        "total_cost_vnd": len(plan["sms_commands"]) * 10000,
-        "sms_commands": plan["sms_commands"],
-        "tickets_detail": plan["tickets"],
+        "secondary_3d_game": plan_3d["mode"] if plan_3d else "Chủ Nhật nghỉ 3D",
+        "total_cost_vnd": total_cost_vnd,
+        "decision_summary": " | ".join(decision_notes),
+        "sms_commands": all_sms_commands,
+        "tickets_detail": tickets_summary,
         "output_sms_file": str(sms_txt_path),
     }
     report_json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

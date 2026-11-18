@@ -2,8 +2,8 @@ name: Vietlott Daily Quantitative Auto-Generator
 
 on:
   schedule:
-    # Chạy tự động lúc 16:30 chiều giờ Việt Nam (09:30 UTC) mỗi ngày từ Thứ 3 đến Chủ Nhật
-    - cron: '30 9 * * 0,2,3,4,5,6'
+    # Chạy tự động lúc 16:30 chiều giờ Việt Nam (09:30 UTC) MỖI NGÀY TRONG TUẦN (Thứ 2 đến Chủ Nhật)
+    - cron: '30 9 * * *'
   workflow_dispatch: # Cho phép bấm chạy thủ công bất cứ lúc nào
 
 permissions:
