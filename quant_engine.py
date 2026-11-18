@@ -77,6 +77,8 @@ def check_morphology_filter(ticket: List[int], cfg: GameConfig, strict: bool = T
 
     consec_pairs = sum(1 for i in range(5) if s[i + 1] - s[i] == 1)
     has_triple_consec = any(s[i + 2] - s[i] == 2 for i in range(4))
+    last_digits = [x % 10 for x in s]
+    unique_last_digits = len(set(last_digits))
 
     metrics = {
         "sum": total_sum,
@@ -86,6 +88,7 @@ def check_morphology_filter(ticket: List[int], cfg: GameConfig, strict: bool = T
         "anti_crowd_gt31": anti_crowd_count,
         "decades": decades,
         "consec_pairs": consec_pairs,
+        "unique_last_digits": unique_last_digits,
     }
 
     if strict:
@@ -98,6 +101,7 @@ def check_morphology_filter(ticket: List[int], cfg: GameConfig, strict: bool = T
             and (decades >= cfg.min_decades)
             and (consec_pairs <= 1)
             and (not has_triple_consec)
+            and (4 <= unique_last_digits <= 5)
         )
     else:
         passed = (
@@ -107,6 +111,7 @@ def check_morphology_filter(ticket: List[int], cfg: GameConfig, strict: bool = T
             and (ac_val >= cfg.min_ac - 1)
             and (anti_crowd_count >= 1)
             and (not has_triple_consec)
+            and (3 <= unique_last_digits <= 6)
         )
 
     return passed, metrics
@@ -188,10 +193,13 @@ def analyze_historical_stats(game_code: str, draws_subset: List[dict] = None) ->
             markov_lift_sum += (trans_matrix[pb][b] + 0.5) / (exp_trans + 0.5)
         markov_score = markov_lift_sum / 6.0
 
-        # Điểm Chu kỳ nghỉ (Survival Hazard Rate):
+        # Điểm Chu kỳ nghỉ theo Mô hình Phân tích Sinh tồn (Weibull & Geometric Hazard Rate):
+        # Kết hợp đỉnh nhịp sinh học (Warm Gap 0.8 - 1.2 mu) và lực đẩy bứt phá của bóng nén lâu (Overdue)
         g_ratio = gaps[b] / mu_gap
-        warm_peak = math.exp(-((g_ratio - 0.80) ** 2) / 0.35)
-        overdue_peak = 0.90 * math.exp(-((g_ratio - 1.75) ** 2) / 0.45)
+        warm_peak = math.exp(-((g_ratio - 0.85) ** 2) / 0.35)
+        # Weibull hazard function (k=1.15): tỷ lệ rủi ro/khả năng xuất hiện tăng dần theo thời gian tích lũy
+        weibull_hazard = ((gaps[b] + 0.5) / mu_gap) ** 0.15
+        overdue_peak = min(1.25, 0.80 * weibull_hazard * math.exp(-((max(0.0, g_ratio - 1.8)) ** 2) / 1.2))
         repeat_bonus = 0.75 if gaps[b] == 0 else 0.0
         gap_score = max(warm_peak, overdue_peak, repeat_bonus)
 
@@ -289,6 +297,10 @@ def score_single_ticket(ticket: List[int], stats: dict) -> float:
     ac_val = compute_ac_value(ticket)
     ac_bonus = ac_val / 10.0
 
+    # Điểm hài hòa đuôi số (Last-digit entropy lift: 4-5 đuôi số khác nhau là phân phối vàng 74%)
+    unique_digits = len(set(x % 10 for x in ticket))
+    digit_entropy_bonus = 0.25 if unique_digits in (4, 5) else 0.0
+
     # Khoá vi phân cá nhân hoá (Owner-bound Pareto Tie-Breaker):
     # Giữ nguyên đỉnh xác suất toán học cho chủ sở hữu chính (proboy172), nhưng tự động dịch chuyển
     # sang nhánh Pareto khác nếu người lạ clone/fork mã nguồn về chạy trên tài khoản khác.
@@ -297,7 +309,15 @@ def score_single_ticket(ticket: List[int], stats: dict) -> float:
     sig_input = f"{owner_id}:{latest_id}:{ticket}".encode("utf-8")
     micro_tie_breaker = (int(hashlib.sha256(sig_input).hexdigest()[:8], 16) / 0xFFFFFFFF) * 0.008
 
-    return indiv_score + 0.35 * pair_score + 0.30 * triplet_score + 0.20 * sum_proximity + 0.15 * ac_bonus + micro_tie_breaker
+    return (
+        indiv_score
+        + 0.35 * pair_score
+        + 0.30 * triplet_score
+        + 0.20 * sum_proximity
+        + 0.15 * ac_bonus
+        + digit_entropy_bonus
+        + micro_tie_breaker
+    )
 
 
 def generate_1_ticket_optimal(stats: dict) -> dict:
@@ -354,6 +374,131 @@ def generate_1_ticket_optimal(stats: dict) -> dict:
         ],
         "sms_commands": [sms_syntax],
     }
+
+
+def generate_2_tickets_diversity_optimal(stats: dict) -> dict:
+    """
+    CHẾ ĐỘ 2 VÉ PHÂN TÁN ĐA DẠNG (Ngân sách 20.000đ/kỳ):
+    Tối ưu hóa đa mục tiêu (Multi-objective Pareto Diversity):
+    - Vé 1: Vé có điểm định lượng cao nhất từ tập hạt giống phân tầng (Core Anchor).
+    - Vé 2: Vé bổ trợ có điểm cao thứ nhì nhưng khống chế độ giao nhau (overlap) chỉ 2-3 số.
+      Giúp mở rộng diện tích phủ lên 9 - 10 quả bóng tiềm năng mà vẫn giữ trọn các cụm bộ ba mạnh.
+    """
+    cfg: GameConfig = stats["config"]
+    candidate_pool = select_stratified_candidates(stats, pool_size=14)
+
+    valid_candidates = []
+    for combo in itertools.combinations(candidate_pool, 6):
+        ticket = sorted(combo)
+        passed, metrics = check_morphology_filter(ticket, cfg, strict=True)
+        if passed:
+            sc = score_single_ticket(ticket, stats)
+            valid_candidates.append((sc, ticket, metrics))
+
+    if len(valid_candidates) < 2:
+        for combo in itertools.combinations(candidate_pool, 6):
+            ticket = sorted(combo)
+            passed, metrics = check_morphology_filter(ticket, cfg, strict=False)
+            if passed:
+                sc = score_single_ticket(ticket, stats)
+                valid_candidates.append((sc, ticket, metrics))
+
+    valid_candidates.sort(key=lambda x: x[0], reverse=True)
+    best_t1 = valid_candidates[0]
+
+    # Tìm Vé 2 thỏa mãn overlap lý tưởng 2-3 số để mở rộng diện tích bảo hiểm
+    best_t2 = None
+    best_pair_joint_score = -1e9
+    for item in valid_candidates[1:60]:
+        sc, tk, met = item
+        overlap = len(set(best_t1[1]).intersection(tk))
+        if overlap in (2, 3):
+            # Thưởng cho việc mở rộng không gian số mà vẫn bảo tồn điểm quant cao
+            joint_score = best_t1[0] + sc + (3 - overlap) * 0.15
+            if joint_score > best_pair_joint_score:
+                best_pair_joint_score = joint_score
+                best_t2 = item
+
+    if best_t2 is None:
+        best_t2 = valid_candidates[1]
+
+    tickets = [
+        {
+            "ticket_index": 1,
+            "role": "Trục chính (Core Quant Anchor)",
+            "numbers": best_t1[1],
+            "formatted": " ".join(f"{n:02d}" for n in best_t1[1]),
+            "quant_score": round(best_t1[0], 4),
+            "metrics": best_t1[2],
+            "sms": f"{cfg.code} K1 S " + " ".join(f"{n:02d}" for n in best_t1[1]),
+        },
+        {
+            "ticket_index": 2,
+            "role": "Phân tán bù trừ (Diversity Hedge)",
+            "numbers": best_t2[1],
+            "formatted": " ".join(f"{n:02d}" for n in best_t2[1]),
+            "quant_score": round(best_t2[0], 4),
+            "metrics": best_t2[2],
+            "sms": f"{cfg.code} K1 S " + " ".join(f"{n:02d}" for n in best_t2[1]),
+        },
+    ]
+
+    covered_balls = sorted(list(set(best_t1[1] + best_t2[1])))
+    return {
+        "mode": "DIVERSITY_2_TICKETS (Chế độ 2 Vé Phân Tán - Ngân sách 20.000đ)",
+        "covered_unique_balls_count": len(covered_balls),
+        "covered_balls": covered_balls,
+        "overlap_count": len(set(best_t1[1]).intersection(best_t2[1])),
+        "tickets": tickets,
+        "sms_commands": [t["sms"] for t in tickets],
+    }
+
+
+def generate_dynamic_quant_plan(stats: dict, live_jackpot_billion: float = 0.0) -> dict:
+    """
+    BỘ ĐIỀU PHỐI VỐN ĐỘNG LINH HOẠT THEO XÁC SUẤT & GIÁ TRỊ KỲ VỌNG (Dynamic Kelly / Probability Allocation):
+    Ngân sách tối đa 30k/kỳ, tự động chọn mức 10k, 20k hoặc 30k dựa trên:
+    1. Lực lượng xác suất kỳ hiện tại: Điểm Quant trung bình của Top 3 số hạt giống (Signal Strength).
+    2. Độ dày của chu kỳ tích lũy: Số lượng bóng đạt trạng thái quá hạn sắp nổ (Overdue Breakout).
+    3. Giá trị kỳ vọng Jackpot: Khi Jackpot lớn hoặc tín hiệu cực nét -> Đẩy tối đa 3 vé (30.000đ).
+       Khi tín hiệu phân tán hoặc trung bình -> Đi 2 vé (20.000đ) để tối ưu độ phủ.
+       Khi tín hiệu mờ -> Thu gọn 1 vé (10.000đ) để bảo toàn vốn.
+    """
+    cfg: GameConfig = stats["config"]
+    top_balls = stats["ranked_balls"]
+    top3_avg_score = sum(b["score"] for b in top_balls[:3]) / 3.0
+    overdue_count = sum(1 for b in top_balls[:12] if "Overdue" in b["status"])
+
+    # Xác định mức độ bùng nổ tín hiệu (Quant Signal Strength)
+    is_jackpot_huge = live_jackpot_billion >= cfg.jackpot_high_threshold_billion
+    is_strong_signal = (top3_avg_score >= 1.25) or (overdue_count >= 3)
+    is_moderate_signal = (top3_avg_score >= 1.18) or (overdue_count >= 1)
+
+    if is_jackpot_huge or (is_strong_signal and live_jackpot_billion >= (cfg.jackpot_high_threshold_billion * 0.5)):
+        # Tín hiệu cực mạnh hoặc Jackpot lớn: Dùng dàn 3 vé Bao 9 rút gọn (30.000đ)
+        plan = generate_3_tickets_abbreviated_wheel(stats)
+        plan["decision_reason"] = (
+            f"Tín hiệu RẤT MẠNH (Top3 Score={top3_avg_score:.3f}, {overdue_count} bóng quá hạn sắp nổ) "
+            f"hoặc Jackpot lớn ({live_jackpot_billion:.1f} tỷ) -> Quyết định đầu tư 3 vé (30.000đ) với Bao 9 Rút Gọn."
+        )
+        plan["budget_vnd"] = 30000
+    elif is_moderate_signal:
+        # Tín hiệu tốt, xác suất thuận lợi: Dùng 2 vé phân tán (20.000đ) phủ 9-10 số
+        plan = generate_2_tickets_diversity_optimal(stats)
+        plan["decision_reason"] = (
+            f"Tín hiệu XÁC SUẤT TỐT (Top3 Score={top3_avg_score:.3f}, {overdue_count} bóng Overdue) "
+            f"-> Quyết định đầu tư 2 vé (20.000đ) để phân tán rủi ro, phủ {plan['covered_unique_balls_count']} số."
+        )
+        plan["budget_vnd"] = 20000
+    else:
+        # Tín hiệu bình thường: Chỉ mua 1 vé tinh gọn (10.000đ)
+        plan = generate_1_ticket_optimal(stats)
+        plan["decision_reason"] = (
+            f"Tín hiệu BÌNH THƯỜNG (Top3 Score={top3_avg_score:.3f}) -> Giữ kỷ luật vốn, chỉ đi 1 vé đơn (10.000đ)."
+        )
+        plan["budget_vnd"] = 10000
+
+    return plan
 
 
 def generate_3_tickets_abbreviated_wheel(stats: dict) -> dict:

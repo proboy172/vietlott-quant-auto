@@ -10,7 +10,9 @@ from quant_engine import (
     GAME_CONFIGS,
     analyze_historical_stats,
     generate_1_ticket_optimal,
+    generate_2_tickets_diversity_optimal,
     generate_3_tickets_abbreviated_wheel,
+    generate_dynamic_quant_plan,
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -89,8 +91,9 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
     live_jp = override_jackpot if override_jackpot is not None else fetch_live_jackpot_billion(game_code)
     stats = analyze_historical_stats(game_code)
 
+    # Bộ điều phối ngân sách động 10k - 30k theo phân tích xác suất đỉnh cao (Dynamic Quant Kelly Allocation)
+    plan = generate_dynamic_quant_plan(stats, live_jackpot_billion=live_jp)
     is_high_jackpot = live_jp >= cfg.jackpot_high_threshold_billion
-    plan = generate_3_tickets_abbreviated_wheel(stats) if is_high_jackpot else generate_1_ticket_optimal(stats)
 
     # Ghi danh sách lệnh SMS ra today_sms.txt (mỗi dòng 1 tin nhắn gửi 9969)
     sms_content = "\n".join(plan["sms_commands"])
@@ -105,6 +108,7 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
         "high_jackpot_threshold_billion": cfg.jackpot_high_threshold_billion,
         "is_high_jackpot": is_high_jackpot,
         "selected_mode": plan["mode"],
+        "budget_decision_reason": plan.get("decision_reason", ""),
         "total_cost_vnd": len(plan["sms_commands"]) * 10000,
         "sms_commands": plan["sms_commands"],
         "tickets_detail": plan["tickets"],
