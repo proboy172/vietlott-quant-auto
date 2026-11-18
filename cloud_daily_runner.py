@@ -85,7 +85,7 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
     decision_notes = []
 
     # 1. PHÂN HỆ MA TRẬN 6 BÓNG (Mega 6/45 hoặc Power 6/55)
-    # Lịch: T3, T5, T7 -> 6/55 | T4, T6, CN -> 6/45 | T2 -> Nghỉ
+    # Lịch: T3, T5, T7 -> 6/55 | T4, T6, CN -> 6/45 | T2 -> Nghỉ (Bảo toàn vốn)
     if game_code is not None:
         cfg = GAME_CONFIGS[game_code]
         live_jp = override_jackpot if override_jackpot is not None else fetch_live_jackpot_billion(game_code)
@@ -106,41 +106,6 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
         cfg = None
         live_jp = 0.0
 
-    # 2. PHÂN HỆ SỐ HỌC 3D (Max 3D hoặc Max 3D Pro) - Ngân sách 10.000đ - 20.000đ
-    # Lịch quay:
-    # - Thứ 2, Thứ 4, Thứ 6: Max 3D (Thứ 2 mua 2 vé 20k, Thứ 4 & Thứ 6 mua 1-2 vé 10k-20k)
-    # - Thứ 3, Thứ 5, Thứ 7: Max 3D Pro (Săn Đặc biệt 2 Tỷ, ngân sách 1-2 vé 10k-20k)
-    # - Chủ Nhật: Không quay 3D
-    plan_3d = None
-    if weekday in (0, 2, 4):  # Thứ 2, Thứ 4, Thứ 6 -> Max 3D
-        stats_3d = analyze_3d_historical_stats("3d")
-        # Thứ 2 dành ngân sách 20k (2 vé), Thứ 4 & 6 bổ trợ 1 vé (10k)
-        num_3d_tickets = 2 if weekday == 0 else 1
-        plan_3d = generate_max3d_daily_plan(stats_3d, budget_tickets=num_3d_tickets)
-        all_sms_commands.extend(plan_3d["sms_commands"])
-        for tk in plan_3d["tickets"]:
-            tickets_summary.append({
-                "game": "Max 3D",
-                "detail": tk,
-            })
-        cost_3d = plan_3d["budget_vnd"]
-        total_cost_vnd += cost_3d
-        decision_notes.append(f"[Max 3D] Mua {num_3d_tickets} vé ({cost_3d:,}đ) tối ưu tần số vị trí & tổng Gauss.")
-    elif weekday in (1, 3, 5):  # Thứ 3, Thứ 5, Thứ 7 -> Max 3D Pro
-        stats_3dpro = analyze_3d_historical_stats("3d_pro")
-        # Đầu tư 1 vé Max 3D Pro (gồm 2 bộ ba số, 10.000đ) để săn giải Đặc biệt 2 Tỷ
-        num_pro_tickets = 1
-        plan_3d = generate_max3dpro_daily_plan(stats_3dpro, budget_tickets=num_pro_tickets)
-        all_sms_commands.extend(plan_3d["sms_commands"])
-        for tk in plan_3d["tickets"]:
-            tickets_summary.append({
-                "game": "Max 3D Pro",
-                "detail": tk,
-            })
-        cost_3d = plan_3d["budget_vnd"]
-        total_cost_vnd += cost_3d
-        decision_notes.append(f"[Max 3D Pro] Mua {num_pro_tickets} vé ({cost_3d:,}đ) săn giải 2 Tỷ với xác suất nổ gấp 29 lần Power.")
-
     # Ghi danh sách lệnh SMS ra today_sms.txt (mỗi dòng 1 tin nhắn gửi 9969)
     sms_content = "\n".join(all_sms_commands)
     sms_txt_path.write_text(sms_content, encoding="utf-8")
@@ -150,9 +115,8 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
         "status": "ACTIVE_BUY" if all_sms_commands else "REST_DAY",
         "primary_matrix_game": cfg.name if cfg else "Nghỉ quay (Thứ 2)",
         "detected_jackpot_billion": live_jp,
-        "secondary_3d_game": plan_3d["mode"] if plan_3d else "Chủ Nhật nghỉ 3D",
         "total_cost_vnd": total_cost_vnd,
-        "decision_summary": " | ".join(decision_notes),
+        "decision_summary": " | ".join(decision_notes) if decision_notes else "Thứ Hai không có lịch quay. Tự động nghỉ để bảo toàn vốn.",
         "sms_commands": all_sms_commands,
         "tickets_detail": tickets_summary,
         "output_sms_file": str(sms_txt_path),
