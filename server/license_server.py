@@ -231,16 +231,24 @@ def can_rebind_now(conn: sqlite3.Connection, license_key: str, now: Optional[dt.
 
 
 def _load_daily_plan_for_today(license_row: sqlite3.Row) -> Dict[str, Any]:
-    """Generate today's plan server-side. Never read from public files."""
+    """Generate today's plan server-side for the bound license. Never read from public files."""
     # Lazy imports to avoid hard failure for admin-only DB ops if deps missing
     try:
         from cloud_daily_runner import run_daily_cloud_pipeline  # type: ignore
     except Exception as exc:
         return {"status": "ERROR", "message": f"plan_generator_unavailable: {exc}"}
 
-    # TODO: use license_row['config_json'] for per-customer personalization (game/qty/numbers).
+    # Per-customer personalization (game, ticket_count/mode, custom numbers) via licenses.config_json
+    config: Dict[str, Any] = {}
+    raw_cfg = license_row["config_json"] if "config_json" in license_row.keys() else None
+    if raw_cfg:
+        try:
+            config = json.loads(raw_cfg) if isinstance(raw_cfg, str) else (raw_cfg or {})
+        except Exception:
+            config = {}
+
     try:
-        plan = run_daily_cloud_pipeline()
+        plan = run_daily_cloud_pipeline(config=config, write_files=False)
     except Exception as exc:
         return {"status": "ERROR", "message": f"plan_generation_failed: {exc}"}
 
@@ -284,6 +292,29 @@ class LicenseService:
             if cur.rowcount == 0:
                 return {"ok": False, "error": "license_not_found"}
         return {"ok": True, "license_key": license_key.upper(), "status": status}
+
+    def set_license_config(self, license_key: str, config: Any) -> Dict[str, Any]:
+        key = license_key.upper()
+        if isinstance(config, str):
+            try:
+                parsed = json.loads(config) if config.strip() else None
+                config_json = json.dumps(parsed, ensure_ascii=False) if parsed is not None else None
+            except Exception:
+                return {"ok": False, "error": "invalid_config_json"}
+        elif isinstance(config, dict):
+            config_json = json.dumps(config, ensure_ascii=False)
+        elif config is None:
+            config_json = None
+        else:
+            return {"ok": False, "error": "invalid_config"}
+        with self._lock, connect(self.db_path) as conn:
+            cur = conn.execute(
+                "UPDATE licenses SET config_json=?, updated_at=? WHERE license_key=?",
+                (config_json, utcnow_iso(), key),
+            )
+            if cur.rowcount == 0:
+                return {"ok": False, "error": "license_not_found"}
+        return {"ok": True, "license_key": key, "config_updated": True}
 
     def list_licenses(self) -> Dict[str, Any]:
         with connect(self.db_path) as conn:
@@ -589,6 +620,13 @@ class Handler(BaseHTTPRequestHandler):
             )
             return _json_response(self, 200 if res.get("ok") else 400, res)
 
+        if path == "/api/admin/set-config":
+            if not self._require_admin():
+                return _json_response(self, 401, {"ok": False, "error": "unauthorized"})
+            cfg = body.get("config") if "config" in body else body.get("config_json")
+            res = svc.set_license_config(str(body.get("license_key", "")), cfg)
+            return _json_response(self, 200 if res.get("ok") else 400, res)
+
         return _json_response(self, 404, {"ok": False, "error": "not_found"})
 
 
@@ -641,6 +679,11 @@ def main() -> int:
     c.add_argument("--fee", type=int, default=REBIND_FEE_VND)
     c.add_argument("--force", action="store_true", help="Override cooldown (use with caution, logged)")
 
+    c = sub.add_parser("set-config", help="Set per-customer config JSON (game/mode/ticket_count/custom_tickets)")
+    c.add_argument("license_key")
+    c.add_argument("--config", default=None, help="JSON string config")
+    c.add_argument("--config-file", default=None, help="Path to JSON config file")
+
     c = sub.add_parser("show-policy", help="Print enforced policy")
 
     args = ap.parse_args()
@@ -683,6 +726,24 @@ def main() -> int:
 
     if args.cmd == "rebind":
         res = svc.admin_rebind(args.license_key, paid_ref=args.paid_ref, reason=args.reason, admin_note=args.admin_note, fee_vnd=args.fee, force=args.force)
+        print(json.dumps(res, ensure_ascii=False, indent=2))
+        return 0 if res.get("ok") else 1
+
+    if args.cmd == "set-config":
+        cfg_obj = None
+        if args.config_file:
+            try:
+                cfg_obj = json.loads(Path(args.config_file).read_text(encoding="utf-8"))
+            except Exception as exc:
+                print(json.dumps({"ok": False, "error": f"invalid_config_file: {exc}"}, ensure_ascii=False))
+                return 1
+        if args.config is not None:
+            try:
+                cfg_obj = json.loads(args.config)
+            except Exception as exc:
+                print(json.dumps({"ok": False, "error": f"invalid_config_json: {exc}"}, ensure_ascii=False))
+                return 1
+        res = svc.set_license_config(args.license_key, cfg_obj)
         print(json.dumps(res, ensure_ascii=False, indent=2))
         return 0 if res.get("ok") else 1
 
