@@ -1,8 +1,16 @@
+import argparse
 import datetime
 import json
+import os
 import re
+import sys
 import urllib.request
 from pathlib import Path
+
+# --- repo root on path (safe when run from server/CI) ---
+BASE_DIR = Path(__file__).resolve().parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
 from data_sync import sync_vietlott_data
 from iphone_automation_server import get_today_game_code
@@ -18,14 +26,15 @@ from quant_engine import (
     generate_max3dpro_daily_plan,
 )
 
-BASE_DIR = Path(__file__).resolve().parent
-PUBLIC_DIR = BASE_DIR / "public"
+# Outputs are PRIVATE (per-day SMS commands have value). Never publish to a public repo/URL.
+# Default: out/daily (gitignored). Override with VIETLOTT_OUT_DIR.
+OUT_DIR = Path(os.environ.get("VIETLOTT_OUT_DIR", str(BASE_DIR / "out" / "daily")))
 
 
 def fetch_live_jackpot_billion(game_code: str) -> float:
     """
-    Tự động lấy giá trị Jackpot hiện tại (đơn vị: tỷ VNĐ) từ trang kết quả xổ số.
-    Nếu không kết nối được (do mạng hoặc geo-block), trả về mức cơ sở (12 tỷ cho 6/45, 30 tỷ cho 6/55).
+    Lấy giá trị Jackpot hiện tại (tỷ VNĐ) từ nguồn công khai.
+    Nếu không lấy được, trả về mức cơ sở (12 tỷ cho 6/45, 30 tỷ cho 6/55).
     """
     default_jp = 12.0 if game_code == "645" else 30.0
     urls = [
@@ -44,7 +53,6 @@ def fetch_live_jackpot_billion(game_code: str) -> float:
             )
             with urllib.request.urlopen(req, timeout=10) as resp:
                 html = resp.read().decode("utf-8", errors="ignore")
-            # Tìm chuỗi số tiền dạng xx.xxx.xxx.xxx (từ 10 tỷ đến 500 tỷ)
             matches = re.findall(r"(\d{1,3}(?:[.,]\d{3}){3})", html)
             candidates = []
             for m in matches:
@@ -58,74 +66,78 @@ def fetch_live_jackpot_billion(game_code: str) -> float:
     return default_jp
 
 
-def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot: float = None) -> dict:
+def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot: float = None,
+                             out_dir: str | Path | None = None, write_files: bool = True) -> dict:
     """
-    Pipeline chạy hoàn toàn tự động mỗi ngày (trên GitHub Actions hoặc Task Scheduler):
-    1. Đồng bộ kết quả quay thưởng mới nhất từ vietvudanh/vietlott-data
-    2. Xác định hôm nay quay giải nào (Thứ 3,5,7 -> 655 | Thứ 4,6,CN -> 645 | Thứ 2 -> Nghỉ)
-    3. Quét giá trị Jackpot thực tế hiện tại để tự quyết định:
-       - Mua 1 vé đơn (10.000đ) khi Jackpot < ngưỡng
-       - Mua dàn 3 vé Bao 9 rút gọn (30.000đ) khi Jackpot >= ngưỡng
-    4. Xuất ra file tĩnh `public/today_sms.txt` để iPhone Shortcuts tự đọc và bắn SMS tới 9969!
+    Chạy pipeline hằng ngày (private): đồng bộ dữ liệu, tính toán, sinh lệnh SMS.
+
+    - Kết quả/lệnh SMS là tài sản vận hành: ghi ra thư mục PRIVATE (mặc định out/daily, gitignored)
+      hoặc trả về in-memory để server cấp phép phân phối cho thiết bị đã kích hoạt.
+    - KHÔNG commit/push lệnh ra repo/file công khai.
     """
-    PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
+    target_out = Path(out_dir) if out_dir else OUT_DIR
+    if write_files:
+        target_out.mkdir(parents=True, exist_ok=True)
+
     sync_vietlott_data()
 
     vn_tz = datetime.timezone(datetime.timedelta(hours=7))
     today = force_date or datetime.datetime.now(vn_tz).date()
     game_code = get_today_game_code(today)
 
-    sms_txt_path = PUBLIC_DIR / "today_sms.txt"
-    report_json_path = PUBLIC_DIR / "today_report.json"
-
-    weekday = today.weekday()
     all_sms_commands = []
     tickets_summary = []
     total_cost_vnd = 0
     decision_notes = []
 
-    # 1. PHÂN HỆ MA TRẬN 6 BÓNG (Mega 6/45 hoặc Power 6/55)
-    # Lịch: T3, T5, T7 -> 6/55 | T4, T6, CN -> 6/45 | T2 -> Nghỉ (Bảo toàn vốn)
     if game_code is not None:
         cfg = GAME_CONFIGS[game_code]
         live_jp = override_jackpot if override_jackpot is not None else fetch_live_jackpot_billion(game_code)
         stats = analyze_historical_stats(game_code)
 
-        # Bộ điều phối ngân sách động 10k - 30k theo xác suất & Jackpot
         plan_matrix = generate_dynamic_quant_plan(stats, live_jackpot_billion=live_jp)
-        all_sms_commands.extend(plan_matrix["sms_commands"])
-        for tk in plan_matrix["tickets"]:
+        all_sms_commands.extend(plan_matrix.get("sms_commands", []))
+        for tk in plan_matrix.get("tickets", []):
             tickets_summary.append({
                 "game": cfg.name,
                 "detail": tk,
             })
-        cost_matrix = len(plan_matrix["sms_commands"]) * 10000
+        cost_matrix = len(plan_matrix.get("sms_commands", [])) * 10000
         total_cost_vnd += cost_matrix
-        decision_notes.append(f"[{cfg.name}] {plan_matrix.get('decision_reason', '')} (Chi phí: {cost_matrix:,}đ)")
+        decision_notes.append(f"[{cfg.name}] {plan_matrix.get('decision_reason', '')} (Chi phi: {cost_matrix:,}d)")
     else:
         cfg = None
         live_jp = 0.0
 
-    # Ghi danh sách lệnh SMS ra today_sms.txt (mỗi dòng 1 tin nhắn gửi 9969)
-    sms_content = "\n".join(all_sms_commands)
-    sms_txt_path.write_text(sms_content, encoding="utf-8")
-
     report = {
         "date": str(today),
         "status": "ACTIVE_BUY" if all_sms_commands else "REST_DAY",
-        "primary_matrix_game": cfg.name if cfg else "Nghỉ quay (Thứ 2)",
+        "primary_matrix_game": cfg.name if cfg else "Nghi quay (Thu 2)",
         "detected_jackpot_billion": live_jp,
         "total_cost_vnd": total_cost_vnd,
-        "decision_summary": " | ".join(decision_notes) if decision_notes else "Thứ Hai không có lịch quay. Tự động nghỉ để bảo toàn vốn.",
+        "decision_summary": " | ".join(decision_notes) if decision_notes else "Thu Hai khong co lich quay. Tu dong nghi de bao toan von.",
         "sms_commands": all_sms_commands,
         "tickets_detail": tickets_summary,
-        "output_sms_file": str(sms_txt_path),
+        "sensitive": True,
+        "distribution": "licensed_device_api_only",
     }
-    report_json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if write_files:
+        sms_txt_path = target_out / "today_sms.txt"
+        report_json_path = target_out / "today_report.json"
+        sms_txt_path.write_text("\n".join(all_sms_commands), encoding="utf-8")
+        report["output_sms_file"] = str(sms_txt_path)
+        report["output_report_file"] = str(report_json_path)
+        report_json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
     return report
 
 
 if __name__ == "__main__":
-    result = run_daily_cloud_pipeline()
+    ap = argparse.ArgumentParser(description="Run daily pipeline (PRIVATE output; do not publish commands publicly)")
+    ap.add_argument("--out-dir", default=None, help="Output directory (default: out/daily or $VIETLOTT_OUT_DIR)")
+    ap.add_argument("--no-write", action="store_true", help="Do not write files, just print JSON plan")
+    ap.add_argument("--jackpot", type=float, default=None, help="Override jackpot (billion VND) for testing")
+    args = ap.parse_args()
+    result = run_daily_cloud_pipeline(override_jackpot=args.jackpot, out_dir=args.out_dir, write_files=not args.no_write)
     print(json.dumps(result, ensure_ascii=False, indent=2))
-

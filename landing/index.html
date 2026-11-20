@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vietlott Auto Flow — AI chọn bộ số tối ưu, tự động gửi Vietlott 24/7</title>
+  <meta name="description" content="AI tính toán & gợi ý bộ số tối ưu, tự động gửi SMS Vietlott tới 9969 đúng lịch 24/7 — không cần thao tác, không bỏ lỡ kỳ, số vé không giới hạn (tùy số dư). Không bán vé, không đảm bảo trúng. Dùng thử 7 ngày 0đ.">
+  <meta name="theme-color" content="#1f0204">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=16">
+  <script src="draws.js?v=16" defer></script>
+  <script src="winners.js?v=16" defer></script>
+  <script src="site.js?v=16" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Bỏ qua tới nội dung chính</a>
+
+  <svg class="icon-sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-infinity" viewBox="0 0 24 24"><path d="M7.3 9.3C5.4 9.3 4 10.5 4 12s1.4 2.7 3.3 2.7c3 0 4.4-5.4 7.4-5.4 1.9 0 3.3 1.2 3.3 2.7s-1.4 2.7-3.3 2.7c-3 0-4.4-5.4-7.4-5.4Z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 5h3M11 18.5h2"/></symbol>
+    <symbol id="i-android" viewBox="0 0 24 24"><path d="M7 9h10v8a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V9Z"/><path d="m8 6 1.5 3M16 6l-1.5 3M9.5 13h.01M14.5 13h.01"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 14h2v6h-2M14 18v2h2"/></symbol>
+    <symbol id="i-bank" viewBox="0 0 24 24"><path d="m3 9 9-5 9 5M4 9v10M20 9v10M8 12v5M12 12v5M16 12v5M3 21h18"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8.5 8.5 0 0 1-8.5 8.5H7l-4 2 1.4-4.2A8.5 8.5 0 1 1 21 12Z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v4a4 4 0 0 1-8 0V4Z"/><path d="M8 5H5v2a3 3 0 0 0 3 3M16 5h3v2a3 3 0 0 1-3 3M12 12v5M8 21h8M9 18h6"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M7 3v4M17 3v4M3.5 9h17"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m9 6 9 6-9 6V6Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.6 5.6L21 9.6l-4.5 4.2 1.2 6.2L12 17l-5.7 3 1.2-6.2L3 9.6l6.4-1L12 3Z"/></symbol>
+    <symbol id="i-warning" viewBox="0 0 24 24"><path d="M12 4 2.8 20h18.4L12 4Z"/><path d="M12 9v5M12 17h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10.5v6M12 7.5h.01"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+  </svg>
+
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="Vietlott Auto Flow — về đầu trang">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span class="brand-text">
+          <strong>Vietlott Auto Flow</strong>
+          <small>Công cụ tự động gửi SMS Vietlott</small>
+        </span>
+      </a>
+
+      <nav class="main-nav" aria-label="Điều hướng chính">
+        <a href="#cach-hoat-dong">Cách hoạt động</a>
+        <a href="#bang-gia">Bảng giá</a>
+        <a href="#bat-dau">Bắt đầu</a>
+        <a href="#cai-dat">Cài đặt</a>
+        <a href="#hoi-dap">Hỏi đáp</a>
+      </nav>
+
+      <div class="header-actions">
+        <button type="button" class="btn btn-ghost btn-sm font-btn" id="font-toggle" aria-pressed="false" aria-label="Bật chữ to">
+          <span class="ft-icon">A+</span><span class="ft-text">Chữ to</span>
+        </button>
+        <a class="btn btn-gold btn-sm header-cta" href="#bat-dau">
+          <span class="cta-full">Dùng thử 7 ngày — 0đ</span>
+          <span class="cta-short">Dùng thử 0đ</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO: nêu rõ sản phẩm là gì -->
+    <section class="hero" id="top">
+      <div class="hero-bg" aria-hidden="true">
+        <span class="hero-orb hero-orb-1"></span>
+        <span class="hero-orb hero-orb-2"></span>
+        <span class="hero-orb hero-orb-3"></span>
+        <span class="hero-grid-lines"></span>
+      </div>
+
+      <div class="container hero-inner">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><span class="live-dot"></span> Công cụ tự động gửi SMS Vietlott · Android &amp; iPhone</p>
+          <h1>AI chọn bộ số tối ưu,<br><span class="text-gold">tự động gửi Vietlott 24/7</span></h1>
+          <p class="hero-lead"><strong>Vietlott Auto Flow</strong> dùng <strong>AI tính toán và gợi ý bộ số theo thuật toán tối ưu</strong> của hệ thống, rồi giúp điện thoại của bạn <strong>tự động gửi SMS tới 9969</strong> đúng lịch <strong>24/7</strong> — <strong>không cần thao tác hằng ngày</strong>, <strong>không giới hạn số vé</strong> (tùy số dư Vietlott SMS), <strong>không bỏ lỡ kỳ quay</strong>. Bạn vẫn toàn quyền tạm dừng bất cứ lúc nào.</p>
+
+          <div class="hero-actions">
+            <a class="btn btn-gold btn-lg" href="#bat-dau">Dùng thử 7 ngày — 0đ</a>
+            <a class="btn btn-outline-light btn-lg" href="#cach-hoat-dong">Xem cách hoạt động <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          </div>
+
+          <ul class="hero-checks" aria-label="Điểm nổi bật">
+            <li><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> AI tính toán &amp; gợi ý bộ số tối ưu</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-bolt"/></svg> Tự động 24/7, không cần thao tác mỗi kỳ</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-infinity"/></svg> Số lượng vé không giới hạn (tùy số dư)</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg> Không bỏ lỡ, không quên, không sai cú pháp</li>
+          </ul>
+
+          <div class="hero-trust" aria-label="Cam kết minh bạch">
+            <span><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> Không bán vé, không mua hộ</span>
+            <span><svg class="icon" aria-hidden="true"><use href="#i-warning"/></svg> Không đảm bảo trúng thưởng</span>
+            <span><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg> Tin gửi từ chính số Vietlott SMS của bạn</span>
+          </div>
+        </div>
+
+        <div class="hero-visual reveal delay-1">
+          <div class="device" role="img" aria-label="Minh họa điện thoại tự gửi lệnh SMS Vietlott">
+            <div class="device-speaker" aria-hidden="true"></div>
+            <div class="device-screen">
+              <div class="app-top">
+                <span class="app-logo" aria-hidden="true">V</span>
+                <span class="app-name">Auto Flow</span>
+                <span class="status-pill"><span class="status-dot"></span> Đang bật</span>
+              </div>
+
+              <div class="app-card">
+                <p class="app-kicker">TIN NHẮN TỰ ĐỘNG · HÔM NAY</p>
+                <p class="app-game" id="ticket-game">POWER 6/55 · KỲ HÔM NAY</p>
+                <div class="balls balls--hero" id="hero-balls"></div>
+                <div class="app-cmd"><code id="ticket-cmd">655 K1 S 08 15 22 31 44 52</code></div>
+                <div class="app-meta">
+                  <div><span>Gửi tới tổng đài</span><strong>9969</strong></div>
+                  <div><span>Trạng thái</span><strong class="text-green">Tự động</strong></div>
+                </div>
+                <div class="app-switch-row">
+                  <span><svg class="icon" aria-hidden="true"><use href="#i-bolt"/></svg> Tự động gửi</span>
+                  <span class="switch is-on" aria-hidden="true"><span></span></span>
+                </div>
+              </div>
+
+              <p class="app-note"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg> Bạn có thể tạm dừng bất cứ lúc nào</p>
+            </div>
+          </div>
+          <p class="hero-caption">Minh họa. Tin nhắn/lệnh và bộ số được tạo riêng theo cấu hình của từng khách hàng.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- THÔNG TIN NHANH -->
+    <section class="stats" aria-label="Thông tin nhanh">
+      <div class="container stats-grid">
+        <div class="stat">
+          <span class="stat-icon" aria-hidden="true"><svg class="icon"><use href="#i-trophy"/></svg></span>
+          <div class="stat-body">
+            <span class="stat-label" id="jackpot-label">Jackpot Power 6/55</span>
+            <strong class="stat-value text-gold" id="jackpot">42,89 tỷ</strong>
+            <span class="stat-note">Giá trị công bố bởi Vietlott (tham khảo)</span>
+          </div>
+        </div>
+        <div class="stat">
+          <span class="stat-icon" aria-hidden="true"><svg class="icon"><use href="#i-clock"/></svg></span>
+          <div class="stat-body">
+            <span class="stat-label" id="countdown-label">Kỳ gần nhất</span>
+            <strong class="stat-value stat-value--mono" id="countdown">--:--:--</strong>
+            <span class="stat-note" id="countdown-note">Đếm ngược tới giờ chốt nhận lệnh</span>
+          </div>
+        </div>
+        <div class="stat">
+          <span class="stat-icon" aria-hidden="true"><svg class="icon"><use href="#i-spark"/></svg></span>
+          <div class="stat-body">
+            <span class="stat-label">Một gói duy nhất</span>
+            <strong class="stat-value text-gold" id="fomo-price">999.000đ</strong>
+            <span class="stat-note">Trọn đời · Dùng thử 7 ngày 0đ</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker-track"></div></div>
+
+    <!-- FOMO: đừng bỏ lỡ kỳ quay -->
+    <section class="fomo-strip" aria-label="Nhắc nhở kỳ quay">
+      <div class="container fomo-inner reveal">
+        <div class="fomo-copy">
+          <p class="fomo-kicker"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> Kỳ quay tiếp theo không chờ bạn</p>
+          <p class="fomo-text">Mỗi kỳ quên gửi là một cơ hội tham gia bị bỏ lỡ. Bật <strong>tự động 24/7</strong> để hệ thống AI và điện thoại lo phần gửi lệnh đúng lịch — <strong>Giá Founder 999.000đ</strong> trọn đời có thể tăng bất cứ lúc nào.</p>
+        </div>
+        <a class="btn btn-gold btn-lg" href="#bat-dau">Giữ quyền lợi — Dùng thử 0đ</a>
+      </div>
+    </section>
+
+    <!-- SẢN PHẨM LÀ GÌ - làm rõ ngay -->
+    <section class="section" id="san-pham">
+      <div class="container">
+        <header class="section-head section-head--center reveal">
+          <p class="eyebrow">Hiểu nhanh — điểm mạnh thật của công cụ</p>
+          <h2>AI tối ưu bộ số, tự động 24/7 — bạn chỉ cần bật một lần</h2>
+          <p class="section-lead">Không phải nơi mua vé. Đây là <strong>công cụ AI + tự động hóa</strong> giúp bạn chọn số thông minh hơn, gửi đúng lịch không bỏ lỡ, và tham gia đều đặn mỗi kỳ — tất cả từ chính điện thoại và tài khoản Vietlott SMS của bạn.</p>
+        </header>
+
+        <div class="clarity-grid reveal">
+          <article class="clarity-card">
+            <span class="clarity-icon" aria-hidden="true"><svg class="icon"><use href="#i-spark"/></svg></span>
+            <h3>Công cụ làm gì cho bạn</h3>
+            <ul>
+              <li><strong>AI tính toán &amp; gợi ý bộ số</strong> theo thuật toán tối ưu của hệ thống, cá nhân hóa riêng cho từng khách (hoặc bạn tự chọn).</li>
+              <li><strong>Tự động gửi 24/7</strong> tin nhắn đúng cú pháp (Mega 6/45 <strong>645</strong>, Power 6/55 <strong>655</strong>) tới <strong>9969</strong> đúng lịch — <strong>không cần thao tác hằng ngày</strong>.</li>
+              <li><strong>Không giới hạn số vé</strong> mỗi kỳ (tùy số dư), <strong>không quên, không sai cú pháp</strong> — giúp bạn tham gia đều đặn, không tự bỏ lỡ cơ hội.</li>
+            </ul>
+          </article>
+          <article class="clarity-card clarity-card--warn">
+            <span class="clarity-icon" aria-hidden="true"><svg class="icon"><use href="#i-x"/></svg></span>
+            <h3>Minh bạch: công cụ không làm gì</h3>
+            <ul>
+              <li><strong>Không bán vé</strong>, không mua hộ, không nhận thưởng hộ, không giữ tiền vé.</li>
+              <li><strong>Không can thiệp kết quả</strong> và <strong>không đảm bảo trúng thưởng</strong> (xổ số là ngẫu nhiên). AI hỗ trợ chọn số &amp; tự động hóa, không hứa hẹn kết quả.</li>
+              <li>Không thay thế tài khoản Vietlott SMS hay tài khoản thanh toán của bạn.</li>
+            </ul>
+          </article>
+          <article class="clarity-card clarity-card--gold">
+            <span class="clarity-icon" aria-hidden="true"><svg class="icon"><use href="#i-pause"/></svg></span>
+            <h3>Tiền vé &amp; quyền kiểm soát</h3>
+            <ul>
+              <li>Khi tin nhắn gửi thành công, <strong>tiền vé do Vietlott trừ</strong> từ tài khoản thanh toán mặc định trong Vietlott SMS của <strong>chính bạn</strong>.</li>
+              <li>Bạn đặt <strong>bao nhiêu vé tùy ý</strong> mỗi kỳ (miễn đủ số dư/hạn mức) và <strong>tạm dừng/bật tắt tự động bất cứ lúc nào</strong> để ngừng gửi lệnh.</li>
+              <li>Kết quả/giải thưởng (nếu có) do Vietlott xử lý theo quy định; công cụ chỉ hỗ trợ chọn số và gửi lệnh.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CÁCH HOẠT ĐỘNG -->
+    <section class="section section--soft" id="cach-hoat-dong">
+      <div class="container">
+        <header class="section-head section-head--center reveal">
+          <p class="eyebrow">Cài 1 lần, tự chạy mãi</p>
+          <h2>Cách hoạt động: 3 bước — tự động 24/7</h2>
+          <p class="section-lead">Chỉ cần cài đặt <strong>một lần</strong>. Sau đó AI và điện thoại sẽ lo phần còn lại: gửi đúng lịch mỗi kỳ, <strong>không cần thao tác thêm</strong>, không quên, không bỏ lỡ — và bạn luôn có thể tạm dừng bất cứ lúc nào.</p>
+        </header>
+
+        <div class="steps" id="steps"></div>
+
+        <div class="flow-note reveal" aria-label="Luồng hoạt động tóm tắt">
+          <div class="flow-step"><strong>Bạn</strong><span>chọn bộ số &amp; bật tự động</span></div>
+          <span class="flow-arrow" aria-hidden="true"><svg class="icon"><use href="#i-arrow"/></svg></span>
+          <div class="flow-step"><strong>Điện thoại</strong><span>tự gửi SMS đúng lịch</span></div>
+          <span class="flow-arrow" aria-hidden="true"><svg class="icon"><use href="#i-arrow"/></svg></span>
+          <div class="flow-step"><strong>9969 (Vietlott)</strong><span>nhận lệnh &amp; trừ tiền vé từ tài khoản của bạn — bạn tham gia đều đặn mỗi kỳ</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ĐIỀU KIỆN CẦN CÓ -->
+    <section class="section" id="dieu-kien">
+      <div class="container container--narrow">
+        <div class="conditions reveal">
+          <div class="conditions-head">
+            <span class="icon-badge" aria-hidden="true"><svg class="icon"><use href="#i-shield"/></svg></span>
+            <div>
+              <h3>4 điều kiện cần có để gửi thành công</h3>
+              <p>Vì công cụ gửi qua kênh SMS Vietlott, bạn cần chuẩn bị sẵn các điều sau (đây là yêu cầu của Vietlott, không phải của riêng công cụ).</p>
+            </div>
+          </div>
+          <ul class="condition-list">
+            <li><span class="condition-num">1</span><span><strong>Có tài khoản dự thưởng Vietlott SMS</strong> đã đăng ký với Vietlott.</span></li>
+            <li><span class="condition-num">2</span><span><strong>Có tài khoản/thẻ thanh toán mặc định</strong> gắn với tài khoản Vietlott SMS đó.</span></li>
+            <li><span class="condition-num">3</span><span><strong>Đủ số dư/hạn mức</strong> trong tài khoản thanh toán để mua số vé bạn chọn.</span></li>
+            <li><span class="condition-num">4</span><span><strong>Gửi từ đúng số điện thoại đã đăng ký</strong>, trong giờ nhận lệnh, và đã bật quyền/tự động hóa cần thiết trên điện thoại.</span></li>
+          </ul>
+          <p class="conditions-foot"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg> Bạn luôn có thể <strong>tạm dừng/bật tắt tự động</strong> bất cứ lúc nào để ngừng gửi lệnh (tránh phát sinh tiền vé ngoài ý muốn).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LỢI ÍCH / KIỂM SOÁT -->
+    <section class="section section--soft" id="loi-ich">
+      <div class="container">
+        <header class="section-head section-head--center reveal">
+          <p class="eyebrow">Điểm mạnh tạo khác biệt</p>
+          <h2>Tham gia đều đặn, thông minh hơn — vẫn do bạn kiểm soát</h2>
+          <p class="section-lead">Kết hợp <strong>AI gợi ý bộ số tối ưu</strong> và <strong>tự động 24/7</strong> để bạn không bỏ lỡ kỳ nào, không sai cú pháp, không tốn công thao tác. Xổ số là ngẫu nhiên (không đảm bảo trúng), nhưng bạn luôn chủ động tham gia theo cách mình muốn.</p>
+        </header>
+        <div class="benefit-grid" id="benefits"></div>
+      </div>
+    </section>
+
+    <!-- BẢNG GIÁ -->
+    <section class="section" id="bang-gia">
+      <div class="container">
+        <header class="section-head section-head--center reveal">
+          <p class="eyebrow">Giá Founder — có thể tăng bất cứ lúc nào</p>
+          <h2>Một lần thanh toán, dùng trọn đời: AI + tự động 24/7</h2>
+          <p class="section-lead">Không phí hàng tháng. Trải nghiệm 7 ngày 0đ, chỉ mua khi thực sự hài lòng. Khách mua hôm nay giữ quyền lợi giá <strong>Founder</strong> hiện tại.</p>
+        </header>
+
+        <div class="price-card reveal">
+          <div class="price-main">
+            <span class="price-ribbon">GIÁ FOUNDER · GIỚI HẠN</span>
+            <h3>Gói Trọn đời</h3>
+            <p class="price-desc">Thanh toán một lần. Không thu phí định kỳ. Có thể tăng giá bất cứ lúc nào.</p>
+            <p class="price-amount" id="price">999.000đ</p>
+            <p class="price-sub">1 gói · 1 khách · 1 số Vietlott SMS · 1 thiết bị đang hoạt động</p>
+            <a class="btn btn-gold btn-lg btn-block" href="#bat-dau">Bắt đầu dùng thử 7 ngày — 0đ</a>
+            <p class="price-fine">Dùng thử không cần thanh toán ngay. Mua gói khi bạn sẵn sàng.</p>
+          </div>
+
+          <div class="price-side">
+            <p class="price-list-title">Gói này bao gồm</p>
+            <div class="price-list" id="price-list"></div>
+            <p class="price-note"><strong>“Trọn đời” nghĩa là:</strong> không thu phí định kỳ, kèm vận hành và cập nhật trong 36 tháng. Nếu về sau có chi phí duy trì bắt buộc, chúng tôi sẽ báo trước để bạn lựa chọn.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BẮT ĐẦU / CHỐT SALE -->
+    <section class="section section--soft" id="bat-dau">
+      <div class="container">
+        <header class="section-head section-head--center reveal">
+          <p class="eyebrow">Đừng bỏ lỡ kỳ quay tiếp theo</p>
+          <h2>Bắt đầu ngay — dùng thử 7 ngày 0đ, không rủi ro</h2>
+          <p class="section-lead">Cài đặt một lần để AI chọn số và hệ thống tự gửi 24/7 cho bạn. Dùng thử miễn phí trước; khi sẵn sàng, chốt gói <strong>Founder 999.000đ trọn đời</strong> (giá có thể tăng).</p>
+        </header>
+
+        <div class="start-paths reveal">
+          <article class="start-card start-card--primary">
+            <span class="start-badge">Khuyên dùng · 0đ</span>
+            <h3>Dùng thử 7 ngày — 0đ</h3>
+            <p>Chưa cần thanh toán. Nhắn Zalo để nhận bộ số gợi ý bởi AI, kiểm tra điều kiện và cài đặt tự động dùng thử.</p>
+            <ol class="mini-steps">
+              <li>Nhắn Zalo: cho biết bạn dùng Android hay iPhone.</li>
+              <li>Nhận hướng dẫn bật tự động và dùng thử.</li>
+              <li>Hài lòng thì mua gói Trọn đời (999.000đ).</li>
+            </ol>
+            <a class="btn btn-gold btn-lg btn-block" id="support-link" href="https://zalo.me/" target="_blank" rel="noopener">Nhắn Zalo để dùng thử 0đ</a>
+          </article>
+
+          <article class="start-card">
+            <span class="start-badge start-badge--muted">Khi bạn muốn mua gói</span>
+            <h3>Thanh toán gói Trọn đời 999.000đ</h3>
+            <p>Điền thông tin bên dưới để tạo <strong>nội dung chuyển khoản</strong> đúng, sau đó thanh toán và báo Zalo để được kích hoạt/cấp link.</p>
+            <ol class="mini-steps">
+              <li>Điền tên + số điện thoại (SĐT đăng ký Vietlott SMS).</li>
+              <li>Chuyển khoản đúng nội dung hiển thị.</li>
+              <li>Báo Zalo để đối soát và nhận link cài đặt riêng.</li>
+            </ol>
+          </article>
+        </div>
+
+        <div class="buy-grid" id="buy">
+          <div class="panel reveal">
+            <div class="panel-head">
+              <span class="panel-num">1</span>
+              <div><h3>Thông tin của bạn</h3><p>Nhập đúng số điện thoại đã đăng ký Vietlott SMS.</p></div>
+            </div>
+            <form id="buy-form" novalidate>
+              <label for="f-name">Họ tên của bạn</label>
+              <input id="f-name" type="text" autocomplete="name" placeholder="Ví dụ: Nguyễn Văn A">
+              <label for="f-phone">Số điện thoại đăng ký Vietlott SMS</label>
+              <input id="f-phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Ví dụ: 0912345678">
+              <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+              <button class="btn btn-gold btn-lg btn-block" type="submit">Tạo nội dung chuyển khoản</button>
+            </form>
+
+            <div class="result-box" id="result" hidden>
+              <p class="result-title">Nội dung chuyển khoản của bạn</p>
+              <div class="result-code">
+                <code id="result-content"></code>
+                <button type="button" class="btn btn-light btn-sm" id="copy-content"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg> Copy</button>
+              </div>
+              <a class="btn btn-gold btn-block" id="zalo-contact" href="#ho-tro">Đã chuyển tiền — báo trên Zalo</a>
+            </div>
+          </div>
+
+          <div class="panel reveal delay-1">
+            <div class="panel-head">
+              <span class="panel-num">2</span>
+              <div><h3>Thanh toán (khi mua gói)</h3><p>Quét QR hoặc chuyển khoản theo thông tin bên dưới.</p></div>
+            </div>
+            <div class="qr-box" id="qr-wrap"></div>
+            <div class="bank-box" id="bank-box"></div>
+            <p class="small muted">Thông tin thật sẽ cập nhật khi hệ thống thanh toán được kết nối. Chỉ chuyển đúng số tài khoản hiển thị trên trang này.</p>
+          </div>
+        </div>
+
+        <div class="panel panel--wide reveal delay-2">
+          <div class="panel-head">
+            <span class="panel-num">3</span>
+            <div><h3>Nhận link cài đặt riêng &amp; hỗ trợ</h3><p>Sau khi đối soát (hoặc khi dùng thử), chúng tôi gửi link/hướng dẫn riêng cho thiết bị của bạn qua Zalo.</p></div>
+          </div>
+          <div class="support-row">
+            <div class="info-box success">
+              <svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>
+              <span><strong>Khi kết nối thanh toán tự động:</strong> thanh toán xong hệ thống sẽ tự đối soát và cấp quyền nhanh hơn. Hiện tại hỗ trợ kích hoạt qua Zalo.</span>
+            </div>
+            <a class="btn btn-gold btn-lg" id="support-link-2" href="https://zalo.me/" target="_blank" rel="noopener">Mở Zalo hỗ trợ</a>
+          </div>
+          <p class="small muted" id="contact-line"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CÀI ĐẶT -->
+    <section class="section" id="cai-dat">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="eyebrow">Cài đặt một lần</p>
+          <h2>Hướng dẫn bật tự động trên điện thoại của bạn</h2>
+          <p class="section-lead">Bạn sẽ nhận link/hướng dẫn riêng sau khi đăng ký. Dưới đây là các bước tổng quát cho từng loại điện thoại — luôn nhớ: bạn có thể <strong>tạm dừng/bật tắt</strong> tự động bất cứ lúc nào.</p>
+        </header>
+
+        <div class="install-tabs reveal">
+          <div class="tab-list" role="tablist" aria-label="Chọn loại điện thoại">
+            <button type="button" class="tab-btn is-active" id="tab-ios" role="tab" aria-selected="true" aria-controls="panel-ios">
+              <svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> iPhone (iOS)
+            </button>
+            <button type="button" class="tab-btn" id="tab-android" role="tab" aria-selected="false" aria-controls="panel-android" tabindex="-1">
+              <svg class="icon" aria-hidden="true"><use href="#i-android"/></svg> Android
+            </button>
+          </div>
+
+          <div class="tab-panel is-active" id="panel-ios" role="tabpanel" aria-labelledby="tab-ios" tabindex="0">
+            <div class="install-panel">
+              <div class="install-copy">
+                <h3>iPhone (iOS) — dùng Phím tắt (Shortcuts)</h3>
+                <ol class="big-steps">
+                  <li>Mở link <strong>Phím tắt</strong> chúng tôi gửi riêng cho bạn.</li>
+                  <li>Chọn <strong>Thêm phím tắt</strong> và cấp các quyền cần thiết (tin nhắn, tự động hóa, thông báo nếu được hỏi).</li>
+                  <li>Bật tự động hóa theo lịch: điện thoại sẽ <strong>tự gửi tin hoàn toàn</strong> đúng giờ, không cần bấm mỗi lần.</li>
+                </ol>
+                <div class="callout callout--gold">
+                  <svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg>
+                  <div><strong>Muốn dừng?</strong><p>Tắt/tạm dừng Phím tắt hoặc tự động hóa là tin nhắn sẽ không được gửi nữa.</p></div>
+                </div>
+              </div>
+              <div class="install-side">
+                <span class="install-badge"><svg class="icon" aria-hidden="true"><use href="#i-bolt"/></svg> Tự động hoàn toàn</span>
+                <p class="install-note">Tùy phiên bản iOS và cài đặt, quyền/tự động hóa cần được bật đúng. Hãy kiểm tra trước kỳ quay đầu tiên.</p>
+                <a class="btn btn-dark btn-block" id="shortcut-link" href="#ho-tro">Nhận link iPhone trên Zalo</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="panel-android" role="tabpanel" aria-labelledby="tab-android" tabindex="0" hidden>
+            <div class="install-panel">
+              <div class="install-copy">
+                <h3>Android — cấp quyền SMS &amp; chạy tự động</h3>
+                <ol class="big-steps">
+                  <li>Mở link/ứng dụng nhận lệnh riêng của bạn trên điện thoại.</li>
+                  <li>Cấp quyền cần thiết (gửi SMS, chạy nền, tắt tối ưu pin cho ứng dụng nếu cần) và bật <strong>tự động gửi</strong>.</li>
+                  <li>Đến lịch quay, điện thoại sẽ <strong>tự gửi tin hoàn toàn</strong>, không cần bấm.</li>
+                </ol>
+                <div class="callout callout--gold">
+                  <svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg>
+                  <div><strong>Muốn dừng?</strong><p>Tắt tự động trong ứng dụng/cài đặt là tin nhắn sẽ không được gửi nữa.</p></div>
+                </div>
+              </div>
+              <div class="install-side">
+                <span class="install-badge"><svg class="icon" aria-hidden="true"><use href="#i-bolt"/></svg> Tự động hoàn toàn</span>
+                <p class="install-note">Đảm bảo điện thoại còn pin/kết nối và tài khoản Vietlott SMS đủ số dư trước mỗi kỳ.</p>
+                <a class="btn btn-dark btn-block" id="android-link" href="#ho-tro">Nhận link Android trên Zalo</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KẾT QUẢ THAM KHẢO -->
+    <section class="section section--dark" id="ket-qua">
+      <div class="container">
+        <header class="section-head section-head--center section-head--light reveal">
+          <p class="eyebrow eyebrow--gold"><span class="live-dot"></span> Thông tin công khai từ Vietlott</p>
+          <h2>Kết quả quay số &amp; khoảnh khắc trúng thưởng</h2>
+          <p class="section-lead">Dữ liệu kết quả được đồng bộ từ nguồn công khai của Vietlott để bạn tiện theo dõi. Đây <strong>không phải thành tích của công cụ</strong> và không hàm ý hứa hẹn trúng thưởng.</p>
+        </header>
+
+        <article class="result-board reveal">
+          <div class="result-board-top">
+            <span class="onair"><span class="live-dot"></span> KẾT QUẢ CÔNG KHAI</span>
+            <span class="result-source">Nguồn: vietlott.vn</span>
+          </div>
+
+          <div class="result-board-main">
+            <div class="result-id">
+              <span class="game-logo-chip"><img id="draw-logo" src="assets/power655.png" alt="Power 6/55" width="120" height="54"></span>
+              <div>
+                <span class="draw-badge" id="draw-name">Power 6/55</span>
+                <p class="draw-meta">Kỳ <strong id="draw-id">01426</strong> · <span id="draw-date">19/11/2026</span></p>
+              </div>
+            </div>
+            <div class="result-jackpot">
+              <span id="result-jackpot-label">Jackpot 1</span>
+              <strong id="result-jackpot">42,89 tỷ</strong>
+            </div>
+          </div>
+
+          <div class="result-numbers">
+            <p class="result-label">Bộ số trúng thưởng</p>
+            <div class="balls balls--result" id="draw-balls" aria-label="Bộ số kết quả"></div>
+            <div class="special-row" id="special-row">
+              <span class="special-label">Số đặc biệt</span>
+              <span class="ball ball--special" id="draw-special">--</span>
+            </div>
+          </div>
+
+          <p class="result-foot">Kết quả hiển thị từ dữ liệu công khai của Vietlott, <strong>không phải thành tích của công cụ</strong>. (Jackpot lớn vẫn quay mỗi kỳ — công cụ giúp bạn không bỏ lỡ cơ hội tham gia.)</p>
+        </article>
+
+        <div class="winners-head" id="winners-head" hidden>
+          <h3>Khoảnh khắc chủ nhân Jackpot (ảnh chính thức Vietlott)</h3>
+          <p class="winners-note">Ảnh do Vietlott công bố, chọn lọc từ trang “Chủ nhân Jackpot”, có ghi nguồn — mang tính tham khảo.</p>
+        </div>
+        <div class="gallery" id="result-gallery" hidden></div>
+
+        <div class="history reveal">
+          <div class="history-head">
+            <h3>Lịch sử các kỳ gần đây</h3>
+            <span class="history-note">Đồng bộ từ dữ liệu công khai</span>
+          </div>
+          <div class="history-list" id="result-history"></div>
+        </div>
+
+        <p class="disclaimer">
+          <svg class="icon" aria-hidden="true"><use href="#i-warning"/></svg>
+          <span><strong>Minh bạch:</strong> Công cụ không bán vé, không mua hộ, không nhận thưởng hộ và <strong>không đảm bảo trúng số</strong>. Kết quả/ảnh (nếu hiển thị) là thông tin công khai của Vietlott, có ghi nguồn, không phải thành tích của công cụ. Việc tham gia dự thưởng tuân theo điều kiện và quy định của Vietlott SMS.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="hoi-dap">
+      <div class="container container--narrow">
+        <header class="section-head section-head--center reveal">
+          <p class="eyebrow">Giải đáp thắc mắc</p>
+          <h2>Câu hỏi thường gặp</h2>
+          <p class="section-lead">Những câu hỏi giúp bạn hiểu rõ công cụ trước khi dùng thử hoặc mua.</p>
+        </header>
+        <div class="faq-list" id="faq-list"></div>
+      </div>
+    </section>
+
+    <!-- ĐIỀU KHOẢN -->
+    <section class="section section--soft" id="dieu-khoan">
+      <div class="container">
+        <header class="section-head reveal">
+          <p class="eyebrow">Rõ ràng &amp; minh bạch</p>
+          <h2>Điều khoản tóm tắt</h2>
+        </header>
+        <div class="terms-grid">
+          <article class="term-card reveal">
+            <span class="term-icon" aria-hidden="true"><svg class="icon"><use href="#i-refresh"/></svg></span>
+            <h3>Dùng thử &amp; không hoàn tiền</h3>
+            <p>Bạn được dùng thử 7 ngày 0đ. Sau khi kích hoạt gói 999.000đ không hoàn tiền, trừ lỗi kỹ thuật từ hệ thống không khắc phục được hoặc theo quy định pháp luật.</p>
+          </article>
+          <article class="term-card reveal delay-1">
+            <span class="term-icon" aria-hidden="true"><svg class="icon"><use href="#i-shield"/></svg></span>
+            <h3>1 gói · 1 thiết bị (không chia sẻ)</h3>
+            <p>Mỗi gói áp dụng cho <strong>1 khách hàng / 1 số Vietlott SMS / 1 thiết bị đang hoạt động</strong> tại một thời điểm. Quyền sử dụng được gắn kích hoạt theo thiết bị, <strong>không dùng chung, không chuyển nhượng, không chia sẻ</strong>. Trường hợp vi phạm/lạm dụng, dịch vụ có thể bị tạm ngưng theo điều khoản.</p>
+          </article>
+          <article class="term-card reveal delay-2">
+            <span class="term-icon" aria-hidden="true"><svg class="icon"><use href="#i-phone"/></svg></span>
+            <h3>Đổi thiết bị: 150.000đ/lần</h3>
+            <p>Đổi/nâng cấp/mất máy hoặc cài lại làm mất kích hoạt: hỗ trợ chuyển thiết bị với <strong>phí 150.000đ mỗi lần đổi</strong> (cần xác minh và mã giao dịch phí). Thiết bị cũ sẽ được <strong>thu hồi/vô hiệu ngay</strong> trước khi kích hoạt máy mới. Để hạn chế lạm dụng, có <strong>thời gian chờ tối thiểu giữa các lần đổi</strong> và giới hạn tần suất (trường hợp đặc biệt xem xét có kiểm soát).</p>
+          </article>
+          <article class="term-card reveal">
+            <span class="term-icon" aria-hidden="true"><svg class="icon"><use href="#i-warning"/></svg></span>
+            <h3>Giới hạn trách nhiệm</h3>
+            <p>Không chịu trách nhiệm cho lỗi/hạn chế từ Vietlott SMS, nhà mạng, thiết bị, số dư tài khoản hay thao tác/cài đặt của bạn. Trách nhiệm tài chính (nếu có) không vượt quá giá trị gói đã thanh toán.</p>
+          </article>
+          <article class="term-card reveal delay-1">
+            <span class="term-icon" aria-hidden="true"><svg class="icon"><use href="#i-lock"/></svg></span>
+            <h3>Dữ liệu &amp; quyền riêng tư</h3>
+            <p>Chỉ thu thập thông tin cần thiết để cấp quyền, gắn thiết bị, cá nhân hóa bộ số/lịch và hỗ trợ. Không bán dữ liệu. Bạn có thể yêu cầu xóa dữ liệu (dịch vụ sẽ chấm dứt).</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- HỖ TRỢ -->
+    <section class="section support-band" id="ho-tro">
+      <div class="container support-inner reveal">
+        <div>
+          <p class="eyebrow eyebrow--gold">Cần hỗ trợ?</p>
+          <h2>Nhắn Zalo để được hướng dẫn tận tình</h2>
+          <p>Chúng tôi hỗ trợ: kiểm tra điều kiện Vietlott SMS, cài đặt Android/iPhone, bật/tắt tự động gửi, tạm dừng khi không muốn mua vé, đổi bộ số/số lượng vé (tùy bạn), xử lý lỗi gửi tin tới 9969, và <strong>đổi thiết bị</strong> (150.000đ/lần, có xác minh &amp; thu hồi máy cũ).</p>
+        </div>
+        <a class="btn btn-gold btn-lg" id="support-link-3" href="https://zalo.me/" target="_blank" rel="noopener">
+          <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg> Mở Zalo hỗ trợ
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <div>
+          <strong>Vietlott Auto Flow</strong>
+          <p>Công cụ tự động gửi SMS Vietlott (độc lập) · Không bán vé · Không mua hộ · Không đảm bảo trúng thưởng.</p>
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="#cach-hoat-dong">Cách hoạt động</a>
+        <a href="#bang-gia">Bảng giá</a>
+        <a href="#bat-dau">Bắt đầu</a>
+        <a href="#cai-dat">Cài đặt</a>
+        <a href="#hoi-dap">Hỏi đáp</a>
+        <a href="#dieu-khoan">Điều khoản</a>
+      </div>
+      <p class="footer-note">© <span id="year"></span> Vietlott Auto Flow. Không liên kết chính thức với Vietlott. Kết quả, hình ảnh và logo thuộc Vietlott; trang chỉ hiển thị thông tin công khai có ghi nguồn.</p>
+    </div>
+  </footer>
+
+  <div class="mobile-dock">
+    <a class="btn btn-outline-light" id="mobile-zalo" href="https://zalo.me/" target="_blank" rel="noopener">
+      <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg> Zalo
+    </a>
+    <a class="btn btn-gold" href="#bat-dau">Dùng thử 0đ</a>
+  </div>
+
+  <noscript>
+    <div class="noscript">Trang cần JavaScript để hiển thị đầy đủ nội dung. Bạn vẫn có thể nhắn Zalo để được tư vấn và dùng thử.</div>
+  </noscript>
+</body>
+</html>

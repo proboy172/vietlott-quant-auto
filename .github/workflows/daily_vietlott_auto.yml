@@ -1,17 +1,16 @@
-name: Vietlott Daily Quantitative Auto-Generator
+name: Vietlott Daily Quant - Private Generate (no public publish)
 
 on:
   schedule:
-    # Chạy tự động lúc 12:00 TRƯA giờ VN (05:00 UTC) MỖI NGÀY TRONG TUẦN (Thứ 2 đến CN)
-    # Giúp có sẵn số từ sớm, iPhone chạy lúc 12:05 hoặc 14:00 thảnh thơi, không bao giờ lo sát giờ 17:45 đóng cổng
+    # 12:00 ICT (05:00 UTC) daily. Generates plan for internal/private use only.
     - cron: '0 5 * * *'
-  workflow_dispatch: # Cho phép bấm chạy thủ công bất cứ lúc nào
+  workflow_dispatch:
 
-permissions:
-  contents: write
+# Do NOT grant contents: write. This workflow must never commit/push SMS commands or reports
+# to the repository (publishing commands enables unpaid use and breaks licensing).
 
 jobs:
-  generate-daily-tickets:
+  generate-daily-plan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -22,14 +21,20 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run Quantitative Engine & Generate SMS Commands for 9969
-        run: python cloud_daily_runner.py
+      - name: Generate daily plan (PRIVATE output)
+        env:
+          VIETLOTT_OUT_DIR: out/daily
+        run: python cloud_daily_runner.py --out-dir out/daily
 
-      - name: Commit & Push today_sms.txt for iPhone Shortcuts
+      - name: Upload private artifact (authorized collaborators only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: vietlott-daily-plan-${{ github.run_id }}
+          path: out/daily/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Security note
         run: |
-          git config user.name "vietlott-quant-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add public/today_sms.txt public/today_report.json data/*.jsonl
-          git diff --staged --quiet || git commit -m "chore(auto): update daily Vietlott SMS ticket commands"
-          git push
-
+          echo "Daily SMS commands are sensitive (value)."
+          echo "Do not publish artifacts/outputs publicly. Distribute only via the authenticated per-device license server (server/license_server.py)."

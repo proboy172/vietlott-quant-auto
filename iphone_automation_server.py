@@ -15,6 +15,12 @@ from quant_engine import (
 
 DB_PATH = Path(__file__).resolve().parent / "data" / "tickets_history.db"
 
+# WARNING (legacy/dev helper):
+# This module can generate and serve today's SMS commands over HTTP WITHOUT license/device auth.
+# Do NOT expose it to the public internet or use it for multi-customer distribution.
+# For production delivery to paying customers, use server/license_server.py which enforces
+# 1 license = 1 active device and serves commands only to authorized devices.
+
 
 def init_db():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -54,9 +60,8 @@ def get_today_game_code(target_date: datetime.date = None) -> str | None:
 def build_today_ticket_plan(jackpot_billion: float = 0.0, force_mode: str = None, force_game: str = None) -> dict:
     """
     Tự động đồng bộ dữ liệu mới nhất, kiểm tra lịch quay hôm nay,
-    so sánh giá trị Jackpot với ngưỡng kích hoạt để xuất ra:
-    - 1 vé đơn (khi Jackpot thấp)
-    - Dàn 3 vé Bao 9 rút gọn (khi Jackpot vượt ngưỡng cao)
+    so sánh giá trị Jackpot với ngưỡng kích hoạt để xuất ra plan/lệnh SMS.
+    (Legacy/internal logic; production gating is handled by server/license_server.py.)
     """
     sync_vietlott_data()
     today = datetime.date.today()
@@ -83,7 +88,7 @@ def build_today_ticket_plan(jackpot_billion: float = 0.0, force_mode: str = None
 
     plan = generate_3_tickets_abbreviated_wheel(stats) if use_wheel3 else generate_1_ticket_optimal(stats)
 
-    # Lưu lịch sử sinh vé vào SQLite
+    # Lưu lịch sử sinh vé vào SQLite (local/internal)
     init_db()
     now_iso = datetime.datetime.now().isoformat(timespec="seconds")
     with sqlite3.connect(DB_PATH) as conn:
@@ -112,11 +117,8 @@ def build_today_ticket_plan(jackpot_billion: float = 0.0, force_mode: str = None
 
 class iPhoneShortcutsHandler(BaseHTTPRequestHandler):
     """
-    HTTP Endpoint phục vụ riêng cho ứng dụng Phím tắt (Apple Shortcuts) trên iPhone:
-    - GET /today-sms?jackpot=45         -> Trả về JSON chứa danh sách sms_commands gửi 9969
-    - GET /today-sms?format=text        -> Trả về từng dòng văn bản thuần (mỗi dòng 1 lệnh SMS)
-    - GET /today-sms?mode=wheel3        -> Ép chạy chế độ dàn 3 vé Bao 9 rút gọn
-    - POST /webhook-9969                -> Nhận tin nhắn xác nhận từ 9969 do iPhone chuyển tiếp về
+    LEGACY/DEV HTTP endpoint (NO AUTH).
+    Do not expose publicly. Use server/license_server.py for per-device licensed delivery.
     """
 
     def do_GET(self):
@@ -139,7 +141,7 @@ class iPhoneShortcutsHandler(BaseHTTPRequestHandler):
         )
 
         if fmt == "text":
-            body = "\n".join(result["sms_commands"]).encode("utf-8")
+            body = "\n".join(result.get("sms_commands", [])).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.end_headers()
@@ -175,19 +177,19 @@ class iPhoneShortcutsHandler(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Vietlott Quantitative Auto-Buy Server for iPhone Shortcuts")
-    parser.add_argument("--serve", action="store_true", help="Khởi chạy HTTP Server ở cổng 8686 cho iPhone Shortcuts")
-    parser.add_argument("--port", type=int, default=8686, help="Cổng HTTP Server (mặc định: 8686)")
-    parser.add_argument("--jackpot", type=float, default=0.0, help="Giá trị Jackpot hiện tại (tỷ VNĐ)")
-    parser.add_argument("--mode", choices=["single", "wheel3"], default=None, help="Chế độ mua: single (1 vé) hoặc wheel3 (3 vé)")
-    parser.add_argument("--game", choices=["645", "655"], default=None, help="Mã sản phẩm: 645 hoặc 655")
+    parser = argparse.ArgumentParser(description="(LEGACY/DEV) Vietlott helper server for iPhone Shortcuts - NO AUTH, do not expose publicly")
+    parser.add_argument("--serve", action="store_true", help="Run HTTP server (dev only, no auth)")
+    parser.add_argument("--port", type=int, default=8686, help="Port (default: 8686)")
+    parser.add_argument("--jackpot", type=float, default=0.0, help="Jackpot value (billion VND)")
+    parser.add_argument("--mode", choices=["single", "wheel3"], default=None, help="Mode: single or wheel3")
+    parser.add_argument("--game", choices=["645", "655"], default=None, help="Game: 645 or 655")
     args = parser.parse_args()
 
     if args.serve:
-        print(f"[iPhone Shortcuts Server] Đang lắng nghe tại http://0.0.0.0:{args.port}/today-sms ...")
+        print(f"[LEGACY/DEV - NO AUTH] Listening at http://0.0.0.0:{args.port}/today-sms")
+        print("[SECURITY] Do not expose publicly. Use server/license_server.py for licensed per-device delivery.")
         server = HTTPServer(("0.0.0.0", args.port), iPhoneShortcutsHandler)
         server.serve_forever()
     else:
         plan = build_today_ticket_plan(jackpot_billion=args.jackpot, force_mode=args.mode, force_game=args.game)
         print(json.dumps(plan, ensure_ascii=False, indent=2))
-

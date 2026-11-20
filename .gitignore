@@ -1,9 +1,46 @@
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local/env/secrets
+.env
+.env.*
+*.local.env
+server/.env
+server/*.env
+
+# Runtime outputs (do NOT commit/distribute publicly - contain per-day SMS commands/plans)
+out/
+public/today_sms.txt
+public/today_report.json
+public/*.private.*
+
+# Databases / customer & license data (PRIVATE)
+data/*.db
+server/*.db
+server/*.sqlite
+server/*.sqlite3
+*.db-journal
+
+# Installers/binaries
 data/*.msix
 data/*.msixbundle
 data/*.appxbundle
-data/*.db
+
+# Local helper scripts (machine-specific)
 install_phonelink.py
 BAT_PHONE_LINK.bat
 
+# Logs
+*.log
+logs/
