@@ -88,3 +88,5 @@ Xem hướng dẫn chi tiết: [`../docs/CLIENT_INTEGRATION.md`](../docs/CLIENT_
 - `today` sinh plan theo logic (`cloud_daily_runner`) **server-side** và chỉ cấp cho thiết bị hợp lệ. Cá nhân hóa theo từng khách qua `licenses.config_json` (game/mode/số lượng/bộ số tùy chọn); có thể mở rộng thêm trường tuỳ nhu cầu vận hành.
 - Kết nối thanh toán (ví dụ SePay webhook) để tự tạo/active license và tự ghi nhận đối soát phí đổi máy là bước tiếp theo; hiện hỗ trợ cấp/đổi thủ công an toàn qua CLI/API admin.
 - Luôn triển khai sau HTTPS, giới hạn rate, giám sát log `access_logs`, và sao lưu DB. Không commit `licenses.db`, secret, hay output lệnh (`out/`).
+
+Xem thêm runbook vận hành & deploy mẫu: [`../docs/OPERATIONS.md`](../docs/OPERATIONS.md), `server/.env.example`, `server/deploy/*.example`.

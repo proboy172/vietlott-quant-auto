@@ -1,0 +1,18 @@
+# Example Caddy reverse proxy (TLS terminated by Caddy). Replace domain and paths.
+# Run license_server bound to 127.0.0.1:8787 behind this proxy.
+
+api.your-domain.example {
+    encode gzip
+
+    # Basic rate limiting requires Caddy build/plugin in some setups; consider adding
+    # rate limiting / WAF at your edge (Cloudflare, etc.) as well.
+
+    reverse_proxy 127.0.0.1:8787 {
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    log {
+        output file /var/log/caddy/vietlott-license.log
+    }
+}

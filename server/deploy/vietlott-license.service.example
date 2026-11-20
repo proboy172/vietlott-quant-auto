@@ -1,0 +1,25 @@
+# Example systemd unit (Linux). Adjust paths/user/env. Run behind HTTPS reverse proxy.
+# sudo cp vietlott-license.service.example /etc/systemd/system/vietlott-license.service
+# sudo systemctl daemon-reload && sudo systemctl enable --now vietlott-license
+
+[Unit]
+Description=Vietlott license & delivery server (private, device-bound)
+After=network.target
+
+[Service]
+Type=simple
+User=youruser
+Group=youruser
+WorkingDirectory=/opt/vietlott-quant-auto
+# Prefer an EnvironmentFile kept private (chmod 600), not committed to git
+EnvironmentFile=/opt/vietlott-quant-auto/server/.env
+ExecStart=/usr/bin/python3 server/license_server.py serve --host 127.0.0.1 --port 8787
+Restart=on-failure
+RestartSec=5
+
+# Hardening (adjust as needed)
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

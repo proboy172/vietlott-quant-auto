@@ -319,9 +319,10 @@ class LicenseService:
     def list_licenses(self) -> Dict[str, Any]:
         with connect(self.db_path) as conn:
             rows = conn.execute(
-                "SELECT l.license_key, l.customer_name, l.phone_vietlott, l.status, l.created_at, l.updated_at, "
+                "SELECT l.license_key, l.customer_name, l.phone_vietlott, l.status, l.package, l.config_json, l.notes, l.created_at, l.updated_at, "
                 "(SELECT COUNT(*) FROM devices d WHERE d.license_key=l.license_key AND d.active=1) AS active_devices, "
-                "(SELECT COUNT(*) FROM rebinds r WHERE r.license_key=l.license_key) AS rebind_count "
+                "(SELECT COUNT(*) FROM rebinds r WHERE r.license_key=l.license_key) AS rebind_count, "
+                "(SELECT cooldown_until FROM rebinds r WHERE r.license_key=l.license_key ORDER BY r.id DESC LIMIT 1) AS last_rebind_cooldown_until "
                 "FROM licenses l ORDER BY l.created_at DESC"
             ).fetchall()
         return {"ok": True, "licenses": [dict(r) for r in rows]}
@@ -664,6 +665,8 @@ def main() -> int:
     c.add_argument("--phone", default="", help="Customer Vietlott SMS phone number")
     c.add_argument("--notes", default="")
     c.add_argument("--key", default="", help="Optional explicit license key")
+    c.add_argument("--config", default=None, help="JSON config (per-customer: game/mode/ticket_count/custom_tickets)")
+    c.add_argument("--config-file", default=None, help="Path to JSON config file")
 
     c = sub.add_parser("set-status", help="Set license status (active|suspended|revoked|expired)")
     c.add_argument("license_key")
@@ -710,7 +713,27 @@ def main() -> int:
     svc = LicenseService(db_path)
 
     if args.cmd == "create-license":
-        res = svc.create_license(customer_name=args.name, phone_vietlott=args.phone, notes=args.notes, license_key=(args.key or None))
+        cfg_obj = None
+        if getattr(args, "config_file", None):
+            try:
+                cfg_obj = json.loads(Path(args.config_file).read_text(encoding="utf-8"))
+            except Exception as exc:
+                print(json.dumps({"ok": False, "error": f"invalid_config_file: {exc}"}, ensure_ascii=False))
+                return 1
+        if getattr(args, "config", None) is not None:
+            try:
+                cfg_obj = json.loads(args.config)
+            except Exception as exc:
+                print(json.dumps({"ok": False, "error": f"invalid_config_json: {exc}"}, ensure_ascii=False))
+                return 1
+        cfg_json = json.dumps(cfg_obj, ensure_ascii=False) if isinstance(cfg_obj, dict) else None
+        res = svc.create_license(
+            customer_name=args.name,
+            phone_vietlott=args.phone,
+            notes=args.notes,
+            license_key=(args.key or None),
+            config_json=cfg_json,
+        )
         print(json.dumps(res, ensure_ascii=False, indent=2))
         return 0 if res.get("ok") else 1
 

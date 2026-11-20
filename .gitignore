@@ -15,9 +15,12 @@ Thumbs.db
 # Local/env/secrets
 .env
 .env.*
+!.env.example
+!server/.env.example
 *.local.env
 server/.env
 server/*.env
+!server/.env.example
 
 # Runtime outputs (do NOT commit/distribute publicly - contain per-day SMS commands/plans)
 out/
