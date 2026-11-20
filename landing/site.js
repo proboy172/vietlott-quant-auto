@@ -44,7 +44,7 @@ const CONFIG = {
     ]
   },
 
-  supportZalo: 'https://zalo.me/',
+  supportZalo: 'https://zalo.me/0906919053',
   contact: '',
   shortcutUrl: '',
   androidUrl: '',
