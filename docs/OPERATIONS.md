@@ -15,13 +15,15 @@ Tài liệu này dành cho chủ sở hữu/vận hành. Mục tiêu: chạy d�
 
 ## 2) Triển khai server (production)
 
-1. **Máy chủ/VPS** (Linux khuyến nghị), Python 3.10+ (chỉ thư viện chuẩn). Chạy từ thư mục gốc repo (để import `cloud_daily_runner`/engine):  
+**Chi tiết triển khai tiết kiệm (subdomain `aivietlott.jbai.vn` + Cloudflare Tunnel, không cần thuê VPS):** xem [`docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md`](DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md). Mẫu deploy: `server/.env.example`, `server/deploy/*`.
+
+1. **Máy chủ/VPS hoặc máy luôn bật** (Windows/Linux), Python 3.10+ (chỉ thư viện chuẩn). Chạy từ thư mục gốc repo (để import `cloud_daily_runner`/engine):
    - `python server/license_server.py init-db`
 2. **Secret & cấu hình (env, không commit):**
    - `ADMIN_TOKEN` = chuỗi ngẫu nhiên đủ mạnh (bắt buộc cho admin API/CLI khi dùng API). Ví dụ PowerShell: `$env:ADMIN_TOKEN="..."` / Linux: `export ADMIN_TOKEN=...`
    - `LICENSE_DB_PATH` (tuỳ chọn, mặc định `server/licenses.db`), `LICENSE_SERVER_HOST`/`LICENSE_SERVER_PORT` (tuỳ chọn). Xem `server/.env.example`.
-3. **HTTPS (bắt buộc khi public Internet):** đặt sau reverse proxy (Nginx/Caddy/Cloudflare Tunnel) terminate TLS, chỉ forward tới `127.0.0.1:8787`. **Không** public HTTP trần. Giới hạn rate-limit, chặn brute-force, bật log truy cập.
-4. **Chạy dịch vụ:** `python server/license_server.py serve --host 127.0.0.1 --port 8787` (qua systemd/supervisor/container tuỳ hạ tầng). Kiểm tra `GET /healthz` và `show-policy`.
+3. **HTTPS (bắt buộc khi public Internet):** đặt sau reverse proxy (Nginx/Caddy) hoặc **Cloudflare Tunnel** provide TLS, chỉ forward tới `127.0.0.1:8787`. **Không** public HTTP trần. Giới hạn rate-limit, chặn brute-force, bật log truy cập.
+4. **Chạy dịch vụ:** `python server/license_server.py serve --host 127.0.0.1 --port 8787` (qua systemd/supervisor/container/Task Scheduler tuỳ hạ tầng). Kiểm tra `GET /healthz` (local: `http://127.0.0.1:8787/healthz`, public: `https://aivietlott.jbai.vn/healthz`).
 5. **Dữ liệu & backup:** `licenses.db` (và WAL/shm nếu có) là **private/tuyệt mật** — phân quyền chặt, **backup định kỳ**, mã hóa/giữ an toàn bản sao. Không đưa DB lên git/public.
 6. **Giám sát:** theo dõi `access_logs` (qua DB) để phát hiện kích hoạt/gọi API bất thường, nhiều thất bại `another_device_active`/`invalid_device_secret` → tạm khóa/điều tra.
 
@@ -47,7 +49,7 @@ python server/license_server.py list
 python server/license_server.py set-status VAF-... suspended|active|revoked|expired
 ```
 
-- Cung cấp cho khách (kênh riêng tư): `SERVER_URL` (HTTPS) + `license_key` + hướng dẫn kích hoạt/tạm dừng (xem `docs/CLIENT_INTEGRATION.md`).
+- Cung cấp cho khách (kênh riêng tư): `SERVER_URL` (HTTPS, ví dụ `https://aivietlott.jbai.vn`) + `license_key` + hướng dẫn kích hoạt/tạm dừng (xem `docs/CLIENT_INTEGRATION.md`).
 - Admin API (header `X-Admin-Token`): `/api/admin/create-license`, `/api/admin/update-license`, `/api/admin/set-config`, `/api/admin/set-status`, `/api/admin/rebind`, `/api/admin/licenses`.
 - Chưa tích hợp Zalo OA/bot tự động; CSKH thủ công theo mẫu: [`docs/ZALO_CSKH_TEMPLATES.md`](../docs/ZALO_CSKH_TEMPLATES.md). Gửi `license_key`/hướng dẫn qua kênh riêng tư, chỉ sau khi đối soát thanh toán.
 

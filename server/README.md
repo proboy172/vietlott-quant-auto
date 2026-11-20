@@ -16,8 +16,9 @@ Xem thêm: [`../docs/SECURITY_LICENSING.md`](../docs/SECURITY_LICENSING.md) và 
 ## Yêu cầu
 
 - Python 3.10+ (chỉ dùng thư viện chuẩn: `sqlite3`, `http.server`, `hmac`, ...).
-- Chạy trên máy chủ riêng/VPS, đặt sau **HTTPS** (reverse proxy: Nginx/Caddy/Cloudflare Tunnel...). Không public HTTP trần.
+- Chạy trên máy chủ riêng/VPS hoặc **máy luôn bật** (Phương án A tiết kiệm), đặt sau **HTTPS** (reverse proxy: Nginx/Caddy/Cloudflare Tunnel...). **Không** public HTTP trần.
 - DB `licenses.db` chứa dữ liệu khách/license → **giữ private, backup định kỳ, phân quyền truy cập**.
+- **Triển khai tiết kiệm (subdomain `aivietlott.jbai.vn` + Cloudflare Tunnel, không cần thuê VPS):** xem [`../docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md`](../docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md).
 
 ## Chạy nhanh (local/dev)
 
@@ -49,11 +50,11 @@ python server/license_server.py set-config VAF-XXXX-XXXX-XXXX-XXXX --config '{"g
 # Hoặc bộ số khách tự chọn (gửi đúng các bộ số này, giới hạn theo ticket_count nếu có)
 python server/license_server.py set-config VAF-XXXX-XXXX-XXXX-XXXX --config '{"game":"645","mode":"custom","custom_tickets":[[1,2,3,4,5,6],[7,8,9,10,11,12]]}'
 
-# Liệt kê
-python server/license_server.py list
-
 # Cập nhật thông tin (tên/SĐT Vietlott SMS/ghi chú, chỉ field truyền vào)
 python server/license_server.py update-license VAF-XXXX-XXXX-XXXX-XXXX --phone "09xxxxxxxx" --notes "Zalo ..., maGD ..."
+
+# Liệt kê
+python server/license_server.py list
 
 # Tạm ngưng / kích hoạt / thu hồi
 python server/license_server.py set-status VAF-XXXX-XXXX-XXXX-XXXX suspended
@@ -89,7 +90,7 @@ Xem hướng dẫn chi tiết: [`../docs/CLIENT_INTEGRATION.md`](../docs/CLIENT_
 ## Lưu ý triển khai thực tế
 
 - `today` sinh plan theo logic (`cloud_daily_runner`) **server-side** và chỉ cấp cho thiết bị hợp lệ. Cá nhân hóa theo từng khách qua `licenses.config_json` (game/mode/số lượng/bộ số tùy chọn); có thể mở rộng thêm trường tuỳ nhu cầu vận hành.
-- Kết nối thanh toán (ví dụ SePay webhook) để tự tạo/active license và tự ghi nhận đối soát phí đổi máy là bước tiếp theo; hiện hỗ trợ cấp/đổi thủ công an toàn qua CLI/API admin.
+- Kết nối thanh toán (ví dụ SePay/webhook) để tự tạo/active license và tự ghi nhận đối soát phí đổi máy là bước tiếp theo; hiện hỗ trợ cấp/đổi thủ công an toàn qua CLI/API admin.
 - Luôn triển khai sau HTTPS, giới hạn rate, giám sát log `access_logs`, và sao lưu DB. Không commit `licenses.db`, secret, hay output lệnh (`out/`).
 
-Xem thêm runbook vận hành & deploy mẫu: [`../docs/OPERATIONS.md`](../docs/OPERATIONS.md), `server/.env.example`, `server/deploy/*.example`.
+Xem thêm runbook vận hành & deploy mẫu: [`../docs/OPERATIONS.md`](../docs/OPERATIONS.md), [`../docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md`](../docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md), `server/.env.example`, `server/deploy/*.example`.

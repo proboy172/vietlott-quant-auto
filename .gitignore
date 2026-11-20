@@ -31,6 +31,8 @@ public/*.private.*
 # Databases / customer & license data (PRIVATE)
 data/*.db
 server/*.db
+server/*.db-shm
+server/*.db-wal
 server/*.sqlite
 server/*.sqlite3
 *.db-journal

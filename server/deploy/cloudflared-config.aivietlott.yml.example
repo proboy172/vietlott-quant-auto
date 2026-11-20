@@ -1,0 +1,16 @@
+# Example Cloudflare Tunnel config for aivietlott.jbai.vn (Option A, cost-saving).
+# Copy/edit to e.g. %USERPROFILE%\.cloudflared\config.yml (or your chosen path),
+# replace <TUNNEL-UUID> and <USER>, then run:
+#   cloudflared tunnel --config "%USERPROFILE%\.cloudflared\config.yml" run aivietlott
+#
+# Prereqs: `cloudflared tunnel login`, `cloudflared tunnel create aivietlott`,
+#          `cloudflared tunnel route dns aivietlott aivietlott.jbai.vn`
+# Run license server locally: python server/license_server.py serve --host 127.0.0.1 --port 8787
+
+tunnel: <TUNNEL-UUID-or-aivietlott>
+credentials-file: C:\Users\<USER>\.cloudflared\<TUNNEL-UUID>.json
+
+ingress:
+  - hostname: aivietlott.jbai.vn
+    service: http://127.0.0.1:8787
+  - service: http_status:404
