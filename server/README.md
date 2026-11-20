@@ -52,6 +52,9 @@ python server/license_server.py set-config VAF-XXXX-XXXX-XXXX-XXXX --config '{"g
 # Liệt kê
 python server/license_server.py list
 
+# Cập nhật thông tin (tên/SĐT Vietlott SMS/ghi chú, chỉ field truyền vào)
+python server/license_server.py update-license VAF-XXXX-XXXX-XXXX-XXXX --phone "09xxxxxxxx" --notes "Zalo ..., maGD ..."
+
 # Tạm ngưng / kích hoạt / thu hồi
 python server/license_server.py set-status VAF-XXXX-XXXX-XXXX-XXXX suspended
 python server/license_server.py set-status VAF-XXXX-XXXX-XXXX-XXXX active
@@ -73,7 +76,7 @@ Tất cả response JSON, `Cache-Control: no-store`.
 - `POST /api/today` hoặc `GET /api/today?license_key=...&device_id=...&device_secret=...`
   - Trả plan/lệnh SMS của ngày **chỉ khi** license active và thiết bị/secret khớp thiết bị đang bind. Plan sinh server-side theo `licenses.config_json` (per-khách) và không ghi ra file public.
 - `POST /api/status` / `GET /api/status?...` — kiểm tra trạng thái license/thiết bị.
-- Admin (header `X-Admin-Token: $ADMIN_TOKEN`): `POST /api/admin/create-license`, `POST /api/admin/set-status`, `POST /api/admin/set-config`, `POST /api/admin/rebind`, `GET /api/admin/licenses`.
+- Admin (header `X-Admin-Token: $ADMIN_TOKEN`): `POST /api/admin/create-license`, `POST /api/admin/update-license`, `POST /api/admin/set-status`, `POST /api/admin/set-config`, `POST /api/admin/rebind`, `GET /api/admin/licenses`.
 
 ## Tích hợp client (iPhone Shortcuts / Android)
 

@@ -31,6 +31,9 @@ Tài liệu này dành cho chủ sở hữu/vận hành. Mục tiêu: chạy d�
 # Tạo license
 python server/license_server.py create-license --name "Khach A" --phone "09xxxxxxxx" --notes "don 999k, maGD ..."
 
+# Cập nhật hồ sơ (SĐT Vietlott SMS thực tế, ghi chú/Zalo/mã GD...)
+python server/license_server.py update-license VAF-... --phone "09xxxxxxxx" --notes "Zalo ..., maGD ..."
+
 # Cá nhân hóa per-khách (config_json) — plan sinh server-side khi /api/today
 # game: "645" (Mega 6/45), "655" (Power 6/55), "auto" (theo lịch ngày)
 # mode: "dynamic" (AI), "1"/"2"/"3" (AI cố định số vé), "custom" (bộ số khách chọn)
@@ -45,7 +48,8 @@ python server/license_server.py set-status VAF-... suspended|active|revoked|expi
 ```
 
 - Cung cấp cho khách (kênh riêng tư): `SERVER_URL` (HTTPS) + `license_key` + hướng dẫn kích hoạt/tạm dừng (xem `docs/CLIENT_INTEGRATION.md`).
-- Admin API (header `X-Admin-Token`): `/api/admin/create-license`, `/api/admin/set-config`, `/api/admin/set-status`, `/api/admin/rebind`, `/api/admin/licenses`.
+- Admin API (header `X-Admin-Token`): `/api/admin/create-license`, `/api/admin/update-license`, `/api/admin/set-config`, `/api/admin/set-status`, `/api/admin/rebind`, `/api/admin/licenses`.
+- Chưa tích hợp Zalo OA/bot tự động; CSKH thủ công theo mẫu: [`docs/ZALO_CSKH_TEMPLATES.md`](../docs/ZALO_CSKH_TEMPLATES.md). Gửi `license_key`/hướng dẫn qua kênh riêng tư, chỉ sau khi đối soát thanh toán.
 
 ## 4) Kích hoạt thiết bị & phân phối (chặn dùng chùa)
 

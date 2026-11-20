@@ -316,6 +316,27 @@ class LicenseService:
                 return {"ok": False, "error": "license_not_found"}
         return {"ok": True, "license_key": key, "config_updated": True}
 
+    def update_license(self, license_key: str, customer_name: Optional[str] = None,
+                       phone_vietlott: Optional[str] = None, notes: Optional[str] = None) -> Dict[str, Any]:
+        """Update license profile fields (only provided non-None fields)."""
+        key = license_key.upper()
+        fields: Dict[str, Any] = {}
+        if customer_name is not None:
+            fields["customer_name"] = (customer_name or None)
+        if phone_vietlott is not None:
+            fields["phone_vietlott"] = (phone_vietlott or None)
+        if notes is not None:
+            fields["notes"] = (notes or None)
+        if not fields:
+            return {"ok": False, "error": "no_fields_to_update"}
+        with self._lock, connect(self.db_path) as conn:
+            sets = ", ".join([f"{k}=?" for k in fields.keys()])
+            params = list(fields.values()) + [utcnow_iso(), key]
+            cur = conn.execute(f"UPDATE licenses SET {sets}, updated_at=? WHERE license_key=?", params)
+            if cur.rowcount == 0:
+                return {"ok": False, "error": "license_not_found"}
+        return {"ok": True, "license_key": key, "updated": list(fields.keys())}
+
     def list_licenses(self) -> Dict[str, Any]:
         with connect(self.db_path) as conn:
             rows = conn.execute(
@@ -602,6 +623,20 @@ class Handler(BaseHTTPRequestHandler):
             except sqlite3.IntegrityError:
                 return _json_response(self, 409, {"ok": False, "error": "license_already_exists"})
 
+        if path == "/api/admin/update-license":
+            if not self._require_admin():
+                return _json_response(self, 401, {"ok": False, "error": "unauthorized"})
+            kwargs = {}
+            if "customer_name" in body or "name" in body:
+                kwargs["customer_name"] = body.get("customer_name", body.get("name"))
+            if "phone_vietlott" in body or "phone" in body:
+                kwargs["phone_vietlott"] = body.get("phone_vietlott", body.get("phone"))
+            if "notes" in body:
+                kwargs["notes"] = body.get("notes")
+            res = svc.update_license(str(body.get("license_key", "")), **kwargs)
+            code = 200 if res.get("ok") else (404 if res.get("error") == "license_not_found" else 400)
+            return _json_response(self, code, res)
+
         if path == "/api/admin/set-status":
             if not self._require_admin():
                 return _json_response(self, 401, {"ok": False, "error": "unauthorized"})
@@ -672,6 +707,12 @@ def main() -> int:
     c.add_argument("license_key")
     c.add_argument("status")
 
+    c = sub.add_parser("update-license", help="Update license profile (name/phone/notes)")
+    c.add_argument("license_key")
+    c.add_argument("--name", default=None)
+    c.add_argument("--phone", default=None, help="Customer Vietlott SMS phone number")
+    c.add_argument("--notes", default=None)
+
     c = sub.add_parser("list", help="List licenses")
 
     c = sub.add_parser("rebind", help="Approve device change: revoke old device, record fee, enforce cooldown")
@@ -739,6 +780,21 @@ def main() -> int:
 
     if args.cmd == "set-status":
         res = svc.set_license_status(args.license_key, args.status)
+        print(json.dumps(res, ensure_ascii=False, indent=2))
+        return 0 if res.get("ok") else 1
+
+    if args.cmd == "update-license":
+        kwargs = {}
+        if args.name is not None:
+            kwargs["customer_name"] = args.name
+        if args.phone is not None:
+            kwargs["phone_vietlott"] = args.phone
+        if args.notes is not None:
+            kwargs["notes"] = args.notes
+        if not kwargs:
+            print(json.dumps({"ok": False, "error": "no_fields_to_update"}, ensure_ascii=False, indent=2))
+            return 1
+        res = svc.update_license(args.license_key, **kwargs)
         print(json.dumps(res, ensure_ascii=False, indent=2))
         return 0 if res.get("ok") else 1
 
