@@ -22,10 +22,10 @@ server/.env
 server/*.env
 !server/.env.example
 
-# Runtime outputs (do NOT commit/distribute publicly - contain per-day SMS commands/plans)
+# Runtime outputs (private/local)
 out/
-public/today_sms.txt
-public/today_report.json
+# Personal auto flow: publish today's SMS commands for owner's iPhone (public read-only).
+# (SaaS distribution uses server/license_server.py; do NOT rely on this for paying customers.)
 public/*.private.*
 
 # Databases / customer & license data (PRIVATE)

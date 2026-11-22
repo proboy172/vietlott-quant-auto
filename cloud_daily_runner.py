@@ -300,4 +300,8 @@ if __name__ == "__main__":
         except Exception:
             cfg = cfg
     result = run_daily_cloud_pipeline(override_jackpot=args.jackpot, out_dir=args.out_dir, write_files=not args.no_write, config=cfg)
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     print(json.dumps(result, ensure_ascii=False, indent=2))

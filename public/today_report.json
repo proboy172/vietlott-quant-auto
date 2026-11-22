@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-22",
+  "status": "ACTIVE_BUY",
+  "primary_matrix_game": "Mega 6/45",
+  "detected_jackpot_billion": 17.59,
+  "total_cost_vnd": 10000,
+  "decision_summary": "[Mega 6/45] Tín hiệu BÌNH THƯỜNG (Top3 Score=1.180) -> Giữ kỷ luật vốn, chỉ đi 1 vé đơn (10.000đ). (Chi phi: 10,000d)",
+  "sms_commands": [
+    "645 K1 S 07 10 20 22 36 41"
+  ],
+  "tickets_detail": [
+    {
+      "game": "Mega 6/45",
+      "detail": {
+        "ticket_index": 1,
+        "numbers": [
+          7,
+          10,
+          20,
+          22,
+          36,
+          41
+        ],
+        "formatted": "07 10 20 22 36 41",
+        "quant_score": 8.3513,
+        "metrics": {
+          "sum": 136,
+          "odd_even": "2:4",
+          "low_high": "4:2",
+          "ac_value": 10,
+          "anti_crowd_gt31": 2,
+          "decades": 5,
+          "consec_pairs": 0,
+          "unique_last_digits": 5
+        },
+        "sms": "645 K1 S 07 10 20 22 36 41"
+      }
+    }
+  ],
+  "sensitive": true,
+  "distribution": "licensed_device_api_only",
+  "config_applied": {
+    "game": "auto",
+    "mode": "dynamic",
+    "ticket_count": null
+  },
+  "output_sms_file": "public\\today_sms.txt",
+  "output_report_file": "public\\today_report.json"
+}
