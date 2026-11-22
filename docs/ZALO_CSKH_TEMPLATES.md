@@ -12,11 +12,11 @@ Tài liệu này cung cấp **mẫu tin nhắn** để hỗ trợ khách qua Zal
 
 ## Thông tin kênh & bản ghi demo (ví dụ nội bộ)
 
-- **Admin/Zalo hỗ trợ:** `0906919053` — link: `https://zalo.me/0906919053`
+- **Zalo hỗ trợ chính:** `0899963938` — link: `https://zalo.me/0899963938`
 **Landing công khai:** `https://landing.jbai.vn/` · **API/server (không gửi cho khách dưới dạng link tải):** `https://aivietlott.jbai.vn`
 - **Khách giả định (demo):** Zalo `0899963938` — license `VAF-F593-EB89-3453-EB4A` (active, 0 thiết bị, `645`/`dynamic`/2 vé), **SĐT Vietlott SMS đã đăng ký: `0906919053`**. DB license là dữ liệu private (`server/licenses.db`).
-- **Link Zalo có tin nhắn sẵn (khách chỉ cần bấm Gửi):** `https://zalo.me/0906919053?text=Xin%20chao%2C%20toi%20muon%20duoc%20cai%20ho%20goi%20Vietlott%20Auto%20Flow.%20SDT%20Vietlott%20SMS%3A%20...`
-- **Liên hệ/Zalo dự phòng:** `https://zalo.me/0899963938` (hiện trên landing dòng “Liên hệ/Zalo dự phòng”).
+- **Link Zalo có tin nhắn sẵn (khách chỉ cần bấm Gửi):** `https://zalo.me/0899963938?text=Xin%20chao%2C%20toi%20muon%20duoc%20cai%20ho%20goi%20Vietlott%20Auto%20Flow.%20SDT%20Vietlott%20SMS%3A%20...`
+- **Zalo hỗ trợ thêm:** `https://zalo.me/0906919053` (hiện trên landing dòng “Zalo hỗ trợ thêm”; cũng là SĐT Vietlott SMS).
 - **Thông tin chuyển khoản gói 999.000đ:** Vietcombank · Chi nhánh PGD Phú Thọ, TP.HCM · STK `0721000544340` · Chủ TK `Nguyễn Nhật Trường` · Nội dung `AUTOFLOW <SĐT đăng ký Vietlott SMS>`. **Chỉ xác nhận/license sau khi đối soát mã GD.**
 
 > Khi gửi khách thật: thay `[TEN_KHACH]`, `[SERVER_URL]`, `[LICENSE_KEY]`, `[GOI_CAU_HINH]`, `[LINK_PHIM_TAT]` bằng thông tin thực.

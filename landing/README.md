@@ -57,7 +57,7 @@ Nguồn công khai: <https://vietlott.vn/vi/trung-thuong/ket-qua-trung-thuong/ch
   - `supportZalo`, `contact`, `shortcutUrl`, `androidUrl`
   - `sepayQr`: URL ảnh QR tĩnh từ SePay (để trống → hiện dòng "chuyển khoản theo thông tin bên dưới", không hiện QR giả)
   - `bank`: tên ngân hàng, chi nhánh, số TK, chủ TK, nội dung CK gợi ý
-  - **Đã điền:** Vietcombank · PGD Phú Thọ TP.HCM · STK `0721000544340` · Nguyễn Nhật Trường · nội dung `AUTOFLOW <SĐT>`; liên hệ dự phòng `zalo.me/0899963938`. Nút Zalo chính vẫn `0906919053`.
+  - **Đã điền:** Vietcombank · PGD Phú Thọ TP.HCM · STK `0721000544340` · Nguyễn Nhật Trường · nội dung `AUTOFLOW <SĐT>`; Zalo chính `zalo.me/0899963938`, Zalo hỗ trợ thêm `zalo.me/0906919053` (cũng là SĐT Vietlott SMS).
   - `steps`, `benefits`, `priceList`, `faq`
   - `draws.images`: mảng URL ảnh **do Vietlott công bố hoặc có quyền dùng** (chỉ hiển thị khi có). Để trống thì ẩn gallery — **không dùng ảnh giả/người thắng không rõ nguồn**.
   - `draws.latest/history/schedule`: fallback khi chưa có `draws.js`

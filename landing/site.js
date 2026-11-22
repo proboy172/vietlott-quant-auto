@@ -44,14 +44,14 @@ const CONFIG = {
     ]
   },
 
-  supportZalo: 'https://zalo.me/0906919053',
+  supportZalo: 'https://zalo.me/0899963938',
   demoVideoUrl: '', // video MP4/WebM hoặc link YouTube; ảnh PNG/JPG cũng được
   zaloPrefill: {
     trial: 'Xin chào, tôi muốn dùng thử 7 ngày 0đ gói Vietlott Auto Flow. Tôi dùng: iPhone/Android. SĐT đăng ký Vietlott SMS của tôi là: ...',
     ios: 'Xin chào, tôi muốn nhận link Phím tắt iPhone và được cài hộ gói Vietlott Auto Flow. SĐT Vietlott SMS của tôi là: ...',
     android: 'Xin chào, tôi muốn nhận link cài đặt Android và được hỗ trợ bật tự động gửi SMS. SĐT Vietlott SMS của tôi là: ...'
   },
-  contact: 'Liên hệ/Zalo dự phòng: https://zalo.me/0899963938',
+  contact: 'Zalo hỗ trợ thêm: https://zalo.me/0906919053',
   shortcutUrl: '',
   androidUrl: '',
   sepayQr: '',

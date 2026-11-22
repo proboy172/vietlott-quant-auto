@@ -52,7 +52,7 @@ Dành cho khách không rành công nghệ/người lớn tuổi. Hỗ trợ có
 | Không có mạng / lỗi kết nối | Kiểm tra Internet và địa chỉ `https://aivietlott.jbai.vn`. |
 | Gửi 9969 nhưng Vietlott không nhận/phản hồi | Kiểm tra: đúng số `0906919053` đã đăng ký Vietlott SMS, tài khoản/thẻ mặc định, đủ số dư/hạn mức, trong giờ nhận. |
 
-**Hỗ trợ Zalo:** https://zalo.me/0906919053
+**Hỗ trợ Zalo:** https://zalo.me/0899963938
 
 ---
 
