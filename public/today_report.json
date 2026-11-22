@@ -2,7 +2,7 @@
   "date": "2026-11-22",
   "status": "ACTIVE_BUY",
   "primary_matrix_game": "Mega 6/45",
-  "detected_jackpot_billion": 17.59,
+  "detected_jackpot_billion": 12.0,
   "total_cost_vnd": 10000,
   "decision_summary": "[Mega 6/45] Tín hiệu BÌNH THƯỜNG (Top3 Score=1.180) -> Giữ kỷ luật vốn, chỉ đi 1 vé đơn (10.000đ). (Chi phi: 10,000d)",
   "sms_commands": [
@@ -44,6 +44,6 @@
     "mode": "dynamic",
     "ticket_count": null
   },
-  "output_sms_file": "public\\today_sms.txt",
-  "output_report_file": "public\\today_report.json"
+  "output_sms_file": "public/today_sms.txt",
+  "output_report_file": "public/today_report.json"
 }
