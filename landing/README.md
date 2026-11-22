@@ -13,9 +13,16 @@ python -m http.server 8080
 Truy cập `http://localhost:8080` (hard refresh `Ctrl+F5` nếu trình duyệt cache CSS/JS cũ).
 
 ## Deploy
-- Copy toàn bộ thư mục `landing/` lên GitHub Pages / Netlify / Vercel / hosting tĩnh.
-- Hoặc đẩy thư mục này làm root site. Khi có domain, trỏ domain vào hosting và bật HTTPS.
-- Không cần chạy Python backend cho landing; backend sinh lệnh riêng sẽ nối sau qua link/API.
+
+**Hiện tại (đã triển khai, 2026-11-22):**
+- Landing public: **https://landing.jbai.vn/** — phục vụ tĩnh từ máy chạy 24/7 qua cùng Cloudflare Tunnel `aivietlott`.
+- Local static server: `python -m http.server 8090 --bind 127.0.0.1 --directory landing` → tunnel ingress `landing.jbai.vn → http://127.0.0.1:8090`.
+- API cấp phép (riêng): **https://aivietlott.jbai.vn** → `http://127.0.0.1:8787` (xem `docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md`).
+- Khởi động tự động khi login: file `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\VietlottAutoFlow.bat` (có guard tránh chạy trùng).
+
+**Deploy chỗ khác (nếu cần):** copy thư mục `landing/` lên GitHub Pages / Netlify / Vercel / hosting tĩnh. Không commit core repo.
+- Khi đổi domain: sửa `link[rel=canonical]`, `og:url`, `og:image` trong `index.html`, `sitemap.xml`, `robots.txt`.
+- Mỗi lần sửa CSS/JS phải **tăng `?v=`** trong `index.html` (hiện `v=20`) để tránh cache cũ.
 
 ## Đồng bộ kết quả Vietlott (1:1 với trang chính thức)
 

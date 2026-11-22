@@ -140,3 +140,28 @@ Cần **cả hai** chạy ổn định và tự khởi động lại:
 - `docs/OPERATIONS.md` — runbook vận hành, bảo mật, đổi máy.
 - `server/README.md`, `server/.env.example`, `server/deploy/*` (Caddy/Nginx/systemd mẫu, cloudflared config mẫu, script chạy Windows).
 - `docs/CLIENT_INTEGRATION.md`, `docs/HUONG_DAN_KHACH_IPHONE.md`, `docs/ZALO_CSKH_TEMPLATES.md`.
+
+
+## 10) Landing public cùng tunnel (đã triển khai)
+
+Ngoài API `aivietlott.jbai.vn`, tunnel `aivietlott` còn phục vụ landing tĩnh:
+
+1. Static server local (chỉ lắng nghe `127.0.0.1`):
+   ```powershell
+   python -m http.server 8090 --bind 127.0.0.1 --directory "D:\Du An Code\vietlott-quant-auto\landing"
+   ```
+2. DNS: `cloudflared tunnel route dns aivietlott landing.jbai.vn`
+3. Thêm ingress vào `%USERPROFILE%\.cloudflared\config.yml` (trước rule `http_status:404`):
+   ```yaml
+     - hostname: aivietlott.jbai.vn
+       service: http://127.0.0.1:8787
+     - hostname: landing.jbai.vn
+       service: http://127.0.0.1:8090
+     - service: http_status:404
+   ```
+4. Restart tunnel task (`Stop-ScheduledTask`/`Start-ScheduledTask -TaskName VietlottCloudflaredTunnel`).
+5. Kiểm tra: `https://landing.jbai.vn/` (HTML landing) và `https://aivietlott.jbai.vn/healthz` (`ok: true`).
+
+**Khởi động tự động khi login (không cần admin):** `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\VietlottAutoFlow.bat` — kiểm tra cổng 8787/8090 và tiến trình cloudflared trước khi start (tránh trùng). Nếu Task Scheduler từ chối đăng ký (Access denied), dùng file Startup này.
+
+**SEO/liên kết:** canonical + Open Graph trỏ `https://landing.jbai.vn/`; có `robots.txt`, `sitemap.xml`, `assets/favicon.svg`. Khi đổi domain phải sửa cả 4 nơi + tăng `?v=` trong `index.html`.

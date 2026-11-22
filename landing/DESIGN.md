@@ -105,7 +105,7 @@ Quy tắc: tối đa 2 màu nhấn (ruby + gold). Trên nền tối dùng trắn
 1. Sửa token trong `:root` trước, không rải giá trị rời rạc. Dùng component/icon sprite có sẵn; thêm mới thì ghi vào file này.
 2. Giữ **phễu rõ ràng**: giải thích công cụ là gì/không là gì → cách hoạt động + điều kiện → giá → bắt đầu (dùng thử 0đ ưu tiên) → cài đặt → tham khảo công khai → FAQ/điều khoản/hỗ trợ. Tránh đưa kết quả/ảnh trúng thưởng như bằng chứng của công cụ.
 3. Kiểm tra: 360/390/768/1024/1280, nút “Chữ to”, `node --check landing/site.js landing/draws.js landing/winners.js`, không lỗi console, không emoji, không tràn ngang, form/copy/countdown/tab chạy.
-   - Mỗi lần sửa CSS/JS phải **tăng `?v=` trong `index.html`** (hiện `v=18`) nếu không browser dùng file cache cũ.
+   - Mỗi lần sửa CSS/JS phải **tăng `?v=` trong `index.html`** (hiện `v=20`; landing public tại `https://landing.jbai.vn/`) nếu không browser dùng file cache cũ. Khi đổi domain: cập nhật canonical/OG trong `index.html`, `sitemap.xml`, `robots.txt`.
    - Chạy Lighthouse: A11y/Best/SEO phải 1.0; kiểm tra `label-content-name-mismatch` (không đặt `aria-label` trùng/khác text hiển thị) và `color-contrast` (footer-note ≥4.5:1).
    - Kiểm tra placeholder: khối thanh toán phải ẩn khi chưa có SePay/bank thật; không public số TK giả.
    - **P1:** mọi nút `.js-zalo` phải có `?text=` (từ `CONFIG.zaloPrefill`), iOS/Android có tin nhắn riêng; `#install-media` phải `hidden` khi `CONFIG.demoVideoUrl` trống ( video MP4/WebM, ảnh, hoặc YouTube embed đều được).

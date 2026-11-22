@@ -13,6 +13,7 @@ Tài liệu này cung cấp **mẫu tin nhắn** để hỗ trợ khách qua Zal
 ## Thông tin kênh & bản ghi demo (ví dụ nội bộ)
 
 - **Admin/Zalo hỗ trợ:** `0906919053` — link: `https://zalo.me/0906919053`
+**Landing công khai:** `https://landing.jbai.vn/` · **API/server (không gửi cho khách dưới dạng link tải):** `https://aivietlott.jbai.vn`
 - **Khách giả định (demo):** Zalo `0899963938` — license `VAF-F593-EB89-3453-EB4A` (trạng thái active, 0 thiết bị, cấu hình demo: `645`/`dynamic`/2 vé). *SĐT Vietlott SMS thực tế cần xác nhận riêng; DB license là dữ liệu private (`server/licenses.db`).*
 
 > Khi gửi khách thật: thay `[TEN_KHACH]`, `[SERVER_URL]`, `[LICENSE_KEY]`, `[GOI_CAU_HINH]`, `[LINK_PHIM_TAT]` bằng thông tin thực.
