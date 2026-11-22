@@ -93,4 +93,4 @@ Xem hướng dẫn chi tiết: [`../docs/CLIENT_INTEGRATION.md`](../docs/CLIENT_
 - Kết nối thanh toán (ví dụ SePay/webhook) để tự tạo/active license và tự ghi nhận đối soát phí đổi máy là bước tiếp theo; hiện hỗ trợ cấp/đổi thủ công an toàn qua CLI/API admin.
 - Luôn triển khai sau HTTPS, giới hạn rate, giám sát log `access_logs`, và sao lưu DB. Không commit `licenses.db`, secret, hay output lệnh (`out/`).
 
-Xem thêm runbook vận hành & deploy mẫu: [`../docs/OPERATIONS.md`](../docs/OPERATIONS.md), [`../docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md`](../docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md), `server/.env.example`, `server/deploy/*.example`.
+Backup/health-check: `deploy/backup-licenses.ps1`, `deploy/health-check.ps1`. Xem thêm runbook vận hành & deploy mẫu: [`../docs/OPERATIONS.md`](../docs/OPERATIONS.md), [`../docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md`](../docs/DEPLOY_AIVIETLOTT_CLOUDFLARE_TUNNEL.md), `server/.env.example`, `server/deploy/*.example`.

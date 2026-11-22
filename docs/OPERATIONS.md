@@ -82,3 +82,31 @@ python server/license_server.py rebind VAF-XXXX-XXXX-XXXX-XXXX \
 - Khách cần: đúng SĐT đã đăng ký Vietlott SMS, tài khoản/thẻ thanh toán mặc định, đủ số dư/hạn mức, trong giờ nhận lệnh, cú pháp đúng, bật quyền/tự động hóa; gửi tới **9969** từ đúng số khách. Thiếu điều kiện Vietlott có thể không nhận lệnh.
 - Khách luôn có quyền **tạm dừng/bật tắt** tự động bất cứ lúc nào.
 - 1 gói/1 khách/1 SĐT Vietlott SMS/1 thiết bị; **không chia sẻ/chuyển nhượng**. Đổi máy **150.000đ/lần**, xác minh, thu hồi máy cũ, cooldown/giới hạn — nêu rõ trên landing/điều khoản khi trao đổi với khách.
+
+
+## 8) Backup, health-check & kiểm chứng E2E (2026-11-22)
+
+**Backup DB định kỳ** (private, không commit; đã ignore `backups/`):
+```powershell
+powershell -ExecutionPolicy Bypass -File .\server\deploy\backup-licenses.ps1
+```
+→ copy `licenses.db` + `-wal`/`-shm` + `SHA256SUMS.txt` vào `backups\licenses\<timestamp>`, giữ 14 bản mới nhất. Đặt bản sao ở nơi an toàn/ngoài máy nếu có thể.
+
+**Health-check nhanh** (4 endpoint: local/public license + local/public landing):
+```powershell
+powershell -ExecutionPolicy Bypass -File .\server\deploy\health-check.ps1
+# hoặc thêm -Json để đưa vào monitoring
+```
+
+**Kiểm chứng luồng khách (đã chạy thành công qua HTTPS, 2026-11-22):**
+1. `create-license ... --config-file <json>` (1 gói/1 SĐT/1 máy).
+2. `POST https://aivietlott.jbai.vn/api/activate` `{license_key, device_id, client_info}` → nhận `device_secret` (chỉ 1 lần, lưu trên máy khách).
+3. `POST https://aivietlott.jbai.vn/api/today` `{license_key, device_id, device_secret}` → `plan.status = ACTIVE_BUY` + `sms_commands` (server sinh riêng theo `config_json`, **không đọc file public**), `delivery.bound_device_only = true`.
+4. Thử activate bằng `device_id` khác → `403 another_device_active` (đúng chính sách 1 thiết bị).
+5. Dọn license test: `set-status <key> revoked` (hoặc xoá bản ghi test khỏi DB local).
+
+**Lưu ý môi trường Windows này:** sau khi OpenCode/server restart, các Scheduled Task có thể về trạng thái `Ready` (tiến trình bị dừng). Khởi động lại bằng:
+```powershell
+Start-ScheduledTask -TaskName VietlottLicenseServer,VietlottCloudflaredTunnel
+```
+hoặc chạy file `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\VietlottAutoFlow.bat` — file này khởi động `server\deploy\watchdog.ps1`, cứ 60 giây kiểm tra và tự start lại dịch vụ nào bị chết (8787 / 8090 / cloudflared). Nếu Task Scheduler báo *Access denied*, dùng file Startup này. Kiểm tra lại bằng `health-check.ps1`.

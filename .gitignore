@@ -24,6 +24,7 @@ server/*.env
 
 # Runtime outputs (private/local)
 out/
+backups/
 # Personal auto flow: publish today's SMS commands for owner's iPhone (public read-only).
 # (SaaS distribution uses server/license_server.py; do NOT rely on this for paying customers.)
 public/*.private.*
