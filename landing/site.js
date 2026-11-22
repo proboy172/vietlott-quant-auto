@@ -51,15 +51,16 @@ const CONFIG = {
     ios: 'Xin chào, tôi muốn nhận link Phím tắt iPhone và được cài hộ gói Vietlott Auto Flow. SĐT Vietlott SMS của tôi là: ...',
     android: 'Xin chào, tôi muốn nhận link cài đặt Android và được hỗ trợ bật tự động gửi SMS. SĐT Vietlott SMS của tôi là: ...'
   },
-  contact: '',
+  contact: 'Liên hệ/Zalo dự phòng: https://zalo.me/0899963938',
   shortcutUrl: '',
   androidUrl: '',
   sepayQr: '',
 
   bank: {
-    name: 'Ngân hàng (sẽ cập nhật)',
-    account: 'Số tài khoản (sẽ cập nhật)',
-    owner: 'Tên chủ tài khoản (sẽ cập nhật)',
+    name: 'Vietcombank',
+    account: '0721000544340',
+    owner: 'Nguyễn Nhật Trường',
+    branch: 'PGD Phú Thọ, TP.HCM',
     content: 'AUTOFLOW'
   },
 
@@ -186,7 +187,7 @@ function render() {
 
   // Ẩn khối thanh toán khi vẫn là placeholder (không public số TK giả)
   const payPanel = $('#payment-panel');
-  if (payPanel && !CONFIG.sepayQr && /sẽ cập nhật/i.test(CONFIG.bank.name)) payPanel.hidden = true;
+  if (payPanel && /sẽ cập nhật/i.test(CONFIG.bank.name || '') && !CONFIG.sepayQr) payPanel.hidden = true;
 
   const contact = $('#contact-line');
   if (contact) {
@@ -198,13 +199,14 @@ function render() {
   if (qr) {
     qr.innerHTML = CONFIG.sepayQr
       ? `<img src="${esc(CONFIG.sepayQr)}" alt="QR thanh toán SePay">`
-      : `<div class="qr-empty">${icon('i-qr')}<strong>QR SePay sẽ hiển thị tại đây</strong><span>Hiện tại, vui lòng chuyển khoản theo thông tin bên dưới.</span></div>`;
+      : `<div class="qr-empty">${icon('i-qr')}<strong>Chuyển khoản theo thông tin bên dưới</strong><span>Mã QR sẽ được cập nhật khi có; hiện vui lòng chuyển khoản trực tiếp.</span></div>`;
   }
 
   const bank = $('#bank-box');
   if (bank) {
     const rows = [
       ['Ngân hàng', CONFIG.bank.name],
+      ['Chi nhánh', CONFIG.bank.branch || ''],
       ['Số tài khoản', CONFIG.bank.account],
       ['Chủ tài khoản', CONFIG.bank.owner],
       ['Nội dung', `${CONFIG.bank.content} SĐT`]
