@@ -199,3 +199,45 @@ Tạm dừng: tắt Tự động hóa. 1 gói = 1 khách / 1 SĐT Vietlott SMS /
 | Chạy tự động vẫn hỏi xác nhận | Tuỳ iOS/cài đặt — test trên máy thật; hướng dẫn khách bật quyền Tự động hóa. |
 
 Tham khảo kỹ thuật: `docs/CLIENT_INTEGRATION.md`, `docs/HUONG_DAN_KHACH_IPHONE_DON_GIAN.md`. Khi bạn gửi được **link iCloud**, mình sẽ điền `shortcutUrl` và soạn tin Zalo gửi khách.
+
+---
+
+## Phụ lục — Thẻ nhanh 20 bước (nhìn vừa làm, bỏ qua phần giải thích)
+
+```
+Tên: Vietlott Auto
+B1  Text "https://aivietlott.jbai.vn" -> SET SERVER_URL
+B2  Get File "vietlott_device.json" (Shortcuts, no picker, no error) -> FILE
+B3  Get Dictionary Value "device_id" from FILE -> DEVICE_ID
+B4  Get Dictionary Value "device_secret" from FILE -> DEVICE_SECRET
+B5  Get Dictionary Value "license_key" from FILE -> SAVED_KEY
+B6  IF SAVED_KEY has any value: SET LICENSE_KEY=SAVED_KEY ; END
+B7  IF DEVICE_ID has no value: Random UUID -> DEVICE_ID ; END
+B8  IF DEVICE_SECRET has no value:
+   B8a IF LICENSE_KEY has no value: Ask for Input Text "Nhập mã kích hoạt" -> LICENSE_KEY ; END
+   B8b Text SERVER_URL + "/api/activate" -> ACT_URL
+   B8c Get Contents of URL: ACT_URL, POST, JSON {license_key, device_id, client_info="ios-shortcut/1.0"} -> ACT_RES
+   B8d value "device_secret" from ACT_RES -> NEW_SECRET
+   B8e value "error"   from ACT_RES -> ERR
+   B8f value "message" from ACT_RES -> MSG
+   B8g IF ERR has any value: Alert "Kích hoạt lỗi: ERR - MSG" ; Stop ; END
+   B8h SET DEVICE_SECRET=NEW_SECRET
+       Dictionary {license_key, device_id, device_secret} -> SAVE_DICT
+       Save File SAVE_DICT -> "vietlott_device.json" (Shortcuts, overwrite, no ask)
+       Notify "Kích hoạt thành công"
+    END
+B9  Text "[SERVER_URL]/api/today?license_key=[LICENSE_KEY]&device_id=[DEVICE_ID]&device_secret=[DEVICE_SECRET]" -> TODAY_URL
+B10 Get Contents of URL TODAY_URL (GET) -> RES
+B11 value "error" from RES -> ERR2
+B12 IF ERR2 has any value: value "message"->MSG2 ; Alert ; Stop ; END
+B13 value "plan" from RES -> PLAN
+B14 value "status" from PLAN -> STATUS
+B15 IF STATUS is "REST_DAY": Notify "Hôm nay không có lệnh" ; Stop ; END
+B16 value "sms_commands" from PLAN -> COMMANDS
+B17 Count COMMANDS -> N
+B18 IF N is 0: Notify "Không có lệnh" ; Stop ; END
+B19 Repeat each COMMANDS: Send Message to "9969", body=Repeat Item ; Wait 3s ; END
+B20 Notify "Đã gửi N tin tới 9969"
+```
+
+**Khách nhận link chỉ làm 3 việc:** Thêm phím tắt → chạy lần đầu nhập mã + Cho phép → bật Tự động hóa. Không sửa action nào.
