@@ -45,7 +45,12 @@ const CONFIG = {
   },
 
   supportZalo: 'https://zalo.me/0906919053',
-  demoVideoUrl: '', // slot video/ảnh hướng dẫn cài hộ (điền khi có thật)
+  demoVideoUrl: '', // video MP4/WebM hoặc link YouTube; ảnh PNG/JPG cũng được
+  zaloPrefill: {
+    trial: 'Xin chào, tôi muốn dùng thử 7 ngày 0đ gói Vietlott Auto Flow. Tôi dùng: iPhone/Android. SĐT đăng ký Vietlott SMS của tôi là: ...',
+    ios: 'Xin chào, tôi muốn nhận link Phím tắt iPhone và được cài hộ gói Vietlott Auto Flow. SĐT Vietlott SMS của tôi là: ...',
+    android: 'Xin chào, tôi muốn nhận link cài đặt Android và được hỗ trợ bật tự động gửi SMS. SĐT Vietlott SMS của tôi là: ...'
+  },
   contact: '',
   shortcutUrl: '',
   androidUrl: '',
@@ -148,11 +153,36 @@ function render() {
   setText('#result-jackpot-label', latest?.game === '645' ? 'Jackpot' : 'Jackpot 1');
 
   const zalo = CONFIG.supportZalo || 'https://zalo.me/';
+  const zaloUrl = (text) => {
+    if (!text) return zalo;
+    return zalo.includes('?') ? `${zalo}&text=${encodeURIComponent(text)}` : `${zalo}?text=${encodeURIComponent(text)}`;
+  };
+  const trialLink = zaloUrl(CONFIG.zaloPrefill?.trial || '');
   ['#support-link', '#support-link-2', '#support-link-3', '#mobile-zalo', '#zalo-contact'].forEach((sel) => {
     const a = $(sel);
-    if (a && !a.dataset.dynamic) a.href = zalo;
+    if (a && !a.dataset.dynamic) a.href = trialLink;
   });
-  $$('.js-zalo').forEach((a) => { a.href = zalo; });
+  $$('.js-zalo').forEach((a) => { a.href = trialLink; });
+
+  // Slot video/ảnh hướng dẫn cài hộ: chỉ hiện khi có nội dung thật
+  const media = $('#install-media');
+  if (media) {
+    const url = (CONFIG.demoVideoUrl || '').trim();
+    const body = $('#install-media-body');
+    if (url && body) {
+      const low = url.toLowerCase();
+      if (/\.(png|jpe?g|webp|gif)$/.test(low)) {
+        body.innerHTML = `<img src="${esc(url)}" alt="Hướng dẫn cài hộ" loading="lazy">`;
+      } else if (/youtube\.com|youtu\.be/.test(low)) {
+        body.innerHTML = `<div class="video-wrap"><iframe src="${esc(url)}" title="Video hướng dẫn cài hộ" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>`;
+      } else {
+        body.innerHTML = `<video src="${esc(url)}" controls preload="none" playsinline></video>`;
+      }
+      media.hidden = false;
+    } else {
+      media.hidden = true;
+    }
+  }
 
   // Ẩn khối thanh toán khi vẫn là placeholder (không public số TK giả)
   const payPanel = $('#payment-panel');
@@ -189,8 +219,18 @@ function render() {
     a.textContent = url ? 'Mở link cá nhân' : fallback;
     a.dataset.dynamic = '1';
   };
-  setLink('#shortcut-link', CONFIG.shortcutUrl, 'Nhận link iPhone trên Zalo');
-  setLink('#android-link', CONFIG.androidUrl, 'Nhận link Android trên Zalo');
+  if (CONFIG.shortcutUrl) {
+    setLink('#shortcut-link', CONFIG.shortcutUrl, 'Nhận link iPhone trên Zalo');
+  } else {
+    const a = $('#shortcut-link');
+    if (a) { a.href = zaloUrl(CONFIG.zaloPrefill?.ios || ''); a.dataset.dynamic = '1'; }
+  }
+  if (CONFIG.androidUrl) {
+    setLink('#android-link', CONFIG.androidUrl, 'Nhận link Android trên Zalo');
+  } else {
+    const a = $('#android-link');
+    if (a) { a.href = zaloUrl(CONFIG.zaloPrefill?.android || ''); a.dataset.dynamic = '1'; }
+  }
 
   const steps = $('#steps');
   if (steps) {
@@ -477,7 +517,7 @@ function bindForm() {
       const code = $('#result-content')?.textContent || `${CONFIG.bank.content} ${phone}`;
       const text = `Xin chào, tôi ${name} (SĐT ${phone}) muốn kích hoạt gói ${CONFIG.price}. Nội dung chuyển khoản: ${code}`;
       const base = CONFIG.supportZalo || 'https://zalo.me/';
-      zaloBtn.href = base.includes('?') ? `${base}&text=${encodeURIComponent(text)}` : base;
+      zaloBtn.href = base.includes('?') ? `${base}&text=${encodeURIComponent(text)}` : `${base}?text=${encodeURIComponent(text)}`;
       window.open(zaloBtn.href, '_blank', 'noopener');
       e.preventDefault();
     });

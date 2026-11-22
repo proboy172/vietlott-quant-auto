@@ -75,6 +75,7 @@ Quy tắc: tối đa 2 màu nhấn (ruby + gold). Trên nền tối dùng trắn
 - **Form:** label rõ, báo lỗi `aria-live`, nút copy, nội dung CK `AUTOFLOW <SĐT>`.
 - **FAQ:** `<details>/<summary>` native (6 câu).
 - **Disclosure** (`.disclosure`): khối thu gọn cho kết quả công khai & điều khoản; `<summary>` ≥44px, có dấu +/−. Mặc định đóng.
+- **Deep-link Zalo:** `zaloUrl(text)` nối `?text=` vào `CONFIG.supportZalo`; 3 mẫu tin trong `CONFIG.zaloPrefill` (trial/ios/android). Khi khách đã điền form, `bindForm()` tạo tin cá nhân hóa (họ tên, SĐT, mã CK).
 
 ## 6. Icon & hình ảnh
 - **Icon:** SVG sprite nội bộ trong `index.html` (`<symbol id="i-...">`), stroke nhất quán — **không dùng emoji** trong UI.
@@ -107,4 +108,5 @@ Quy tắc: tối đa 2 màu nhấn (ruby + gold). Trên nền tối dùng trắn
    - Mỗi lần sửa CSS/JS phải **tăng `?v=` trong `index.html`** (hiện `v=18`) nếu không browser dùng file cache cũ.
    - Chạy Lighthouse: A11y/Best/SEO phải 1.0; kiểm tra `label-content-name-mismatch` (không đặt `aria-label` trùng/khác text hiển thị) và `color-contrast` (footer-note ≥4.5:1).
    - Kiểm tra placeholder: khối thanh toán phải ẩn khi chưa có SePay/bank thật; không public số TK giả.
+   - **P1:** mọi nút `.js-zalo` phải có `?text=` (từ `CONFIG.zaloPrefill`), iOS/Android có tin nhắn riêng; `#install-media` phải `hidden` khi `CONFIG.demoVideoUrl` trống ( video MP4/WebM, ảnh, hoặc YouTube embed đều được).
 4. Giữ tuyên bố minh bạch (không bán vé, không mua hộ, không đảm bảo trúng, tạm dừng bất cứ lúc nào) dễ thấy ở hero, clarity, điều kiện, bắt đầu, footer/disclaimer.
