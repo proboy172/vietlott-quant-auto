@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=16">
-  <script src="draws.js?v=16" defer></script>
-  <script src="winners.js?v=16" defer></script>
-  <script src="site.js?v=16" defer></script>
+  <link rel="stylesheet" href="styles.css?v=18">
+  <script src="draws.js?v=18" defer></script>
+  <script src="winners.js?v=18" defer></script>
+  <script src="site.js?v=18" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Bỏ qua tới nội dung chính</a>
@@ -48,7 +48,7 @@
 
   <header class="site-header" id="site-header">
     <div class="container header-inner">
-      <a class="brand" href="#top" aria-label="Vietlott Auto Flow — về đầu trang">
+      <a class="brand" href="#top">
         <span class="brand-mark" aria-hidden="true">V</span>
         <span class="brand-text">
           <strong>Vietlott Auto Flow</strong>
@@ -65,10 +65,10 @@
       </nav>
 
       <div class="header-actions">
-        <button type="button" class="btn btn-ghost btn-sm font-btn" id="font-toggle" aria-pressed="false" aria-label="Bật chữ to">
+        <button type="button" class="btn btn-ghost btn-sm font-btn" id="font-toggle" aria-pressed="false">
           <span class="ft-icon">A+</span><span class="ft-text">Chữ to</span>
         </button>
-        <a class="btn btn-gold btn-sm header-cta" href="#bat-dau">
+        <a class="btn btn-gold btn-sm header-cta js-zalo" href="https://zalo.me/0906919053">
           <span class="cta-full">Dùng thử 7 ngày — 0đ</span>
           <span class="cta-short">Dùng thử 0đ</span>
         </a>
@@ -88,18 +88,19 @@
 
       <div class="container hero-inner">
         <div class="hero-copy reveal">
-          <p class="eyebrow"><span class="live-dot"></span> Công cụ tự động gửi SMS Vietlott · Android &amp; iPhone</p>
-          <h1>AI chọn bộ số tối ưu,<br><span class="text-gold">tự động gửi Vietlott 24/7</span></h1>
-          <p class="hero-lead"><strong>Vietlott Auto Flow</strong> dùng <strong>AI tính toán và gợi ý bộ số theo thuật toán tối ưu</strong> của hệ thống, rồi giúp điện thoại của bạn <strong>tự động gửi SMS tới 9969</strong> đúng lịch <strong>24/7</strong> — <strong>không cần thao tác hằng ngày</strong>, <strong>không giới hạn số vé</strong> (tùy số dư Vietlott SMS), <strong>không bỏ lỡ kỳ quay</strong>. Bạn vẫn toàn quyền tạm dừng bất cứ lúc nào.</p>
+          <p class="eyebrow"><span class="live-dot"></span> Nhắn Zalo — chúng tôi cài hộ trong 5 phút · Android &amp; iPhone</p>
+          <h1>AI chọn số, tự động gửi SMS<br><span class="text-gold">Vietlott 24/7 — bạn cài một lần</span></h1>
+          <p class="hero-lead"><strong>Vietlott Auto Flow</strong> dùng AI gợi ý bộ số và giúp điện thoại của bạn <strong>tự gửi SMS tới 9969</strong> đúng lịch, <strong>24/7</strong>. <strong>Nhắn Zalo là chúng tôi cài hộ cho bạn trong 5 phút</strong> — bạn không cần tự thiết lập. Bạn luôn được <strong>tạm dừng/bật lại bất cứ lúc nào</strong>.</p>
 
           <div class="hero-actions">
-            <a class="btn btn-gold btn-lg" href="#bat-dau">Dùng thử 7 ngày — 0đ</a>
+            <a class="btn btn-gold btn-lg js-zalo" href="https://zalo.me/0906919053">Nhắn Zalo — cài hộ 0đ</a>
             <a class="btn btn-outline-light btn-lg" href="#cach-hoat-dong">Xem cách hoạt động <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
           </div>
+          <p class="hero-note">Hỗ trợ cài đặt 1-1 qua Zalo (khoảng 5 phút). Không bắt khách tự đấu phím tắt.</p>
 
           <ul class="hero-checks" aria-label="Điểm nổi bật">
             <li><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg> AI tính toán &amp; gợi ý bộ số tối ưu</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-bolt"/></svg> Tự động 24/7, không cần thao tác mỗi kỳ</li>
+            <li><svg class="icon" aria-hidden="true"><use href="#i-bolt"/></svg> Tự gửi đúng lịch 24/7, cài một lần</li>
             <li><svg class="icon" aria-hidden="true"><use href="#i-infinity"/></svg> Số lượng vé không giới hạn (tùy số dư)</li>
             <li><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg> Không bỏ lỡ, không quên, không sai cú pháp</li>
           </ul>
@@ -183,7 +184,7 @@
           <p class="fomo-kicker"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> Kỳ quay tiếp theo không chờ bạn</p>
           <p class="fomo-text">Mỗi kỳ quên gửi là một cơ hội tham gia bị bỏ lỡ. Bật <strong>tự động 24/7</strong> để hệ thống AI và điện thoại lo phần gửi lệnh đúng lịch — <strong>Giá Founder 999.000đ</strong> trọn đời có thể tăng bất cứ lúc nào.</p>
         </div>
-        <a class="btn btn-gold btn-lg" href="#bat-dau">Giữ quyền lợi — Dùng thử 0đ</a>
+        <a class="btn btn-gold btn-lg js-zalo" href="https://zalo.me/0906919053">Giữ giá Founder — Nhắn Zalo</a>
       </div>
     </section>
 
@@ -271,18 +272,6 @@
       </div>
     </section>
 
-    <!-- LỢI ÍCH / KIỂM SOÁT -->
-    <section class="section section--soft" id="loi-ich">
-      <div class="container">
-        <header class="section-head section-head--center reveal">
-          <p class="eyebrow">Điểm mạnh tạo khác biệt</p>
-          <h2>Tham gia đều đặn, thông minh hơn — vẫn do bạn kiểm soát</h2>
-          <p class="section-lead">Kết hợp <strong>AI gợi ý bộ số tối ưu</strong> và <strong>tự động 24/7</strong> để bạn không bỏ lỡ kỳ nào, không sai cú pháp, không tốn công thao tác. Xổ số là ngẫu nhiên (không đảm bảo trúng), nhưng bạn luôn chủ động tham gia theo cách mình muốn.</p>
-        </header>
-        <div class="benefit-grid" id="benefits"></div>
-      </div>
-    </section>
-
     <!-- BẢNG GIÁ -->
     <section class="section" id="bang-gia">
       <div class="container">
@@ -299,7 +288,7 @@
             <p class="price-desc">Thanh toán một lần. Không thu phí định kỳ. Có thể tăng giá bất cứ lúc nào.</p>
             <p class="price-amount" id="price">999.000đ</p>
             <p class="price-sub">1 gói · 1 khách · 1 số Vietlott SMS · 1 thiết bị đang hoạt động</p>
-            <a class="btn btn-gold btn-lg btn-block" href="#bat-dau">Bắt đầu dùng thử 7 ngày — 0đ</a>
+            <a class="btn btn-gold btn-lg btn-block js-zalo" href="https://zalo.me/0906919053">Nhắn Zalo để bắt đầu 0đ</a>
             <p class="price-fine">Dùng thử không cần thanh toán ngay. Mua gói khi bạn sẵn sàng.</p>
           </div>
 
@@ -371,7 +360,7 @@
             </div>
           </div>
 
-          <div class="panel reveal delay-1">
+          <div class="panel reveal delay-1" id="payment-panel">
             <div class="panel-head">
               <span class="panel-num">2</span>
               <div><h3>Thanh toán (khi mua gói)</h3><p>Quét QR hoặc chuyển khoản theo thông tin bên dưới.</p></div>
@@ -405,7 +394,7 @@
         <header class="section-head reveal">
           <p class="eyebrow">Cài đặt một lần</p>
           <h2>Hướng dẫn bật tự động trên điện thoại của bạn</h2>
-          <p class="section-lead">Bạn sẽ nhận link/hướng dẫn riêng sau khi đăng ký. Dưới đây là các bước tổng quát cho từng loại điện thoại — luôn nhớ: bạn có thể <strong>tạm dừng/bật tắt</strong> tự động bất cứ lúc nào.</p>
+          <p class="section-lead">Bạn sẽ được hỗ trợ <strong>cài hộ qua Zalo</strong> trong khoảng 5 phút. Dưới đây là các bước tổng quát — và bạn luôn có thể <strong>tạm dừng/bật tắt</strong> tự động bất cứ lúc nào.</p>
         </header>
 
         <div class="install-tabs reveal">
@@ -468,6 +457,8 @@
     <!-- KẾT QUẢ THAM KHẢO -->
     <section class="section section--dark" id="ket-qua">
       <div class="container">
+        <details class="disclosure">
+          <summary>Kết quả &amp; hình ảnh công khai từ Vietlott (tham khảo — nhấn để mở)</summary>
         <header class="section-head section-head--center section-head--light reveal">
           <p class="eyebrow eyebrow--gold"><span class="live-dot"></span> Thông tin công khai từ Vietlott</p>
           <h2>Kết quả quay số &amp; khoảnh khắc trúng thưởng</h2>
@@ -524,6 +515,7 @@
           <svg class="icon" aria-hidden="true"><use href="#i-warning"/></svg>
           <span><strong>Minh bạch:</strong> Công cụ không bán vé, không mua hộ, không nhận thưởng hộ và <strong>không đảm bảo trúng số</strong>. Kết quả/ảnh (nếu hiển thị) là thông tin công khai của Vietlott, có ghi nguồn, không phải thành tích của công cụ. Việc tham gia dự thưởng tuân theo điều kiện và quy định của Vietlott SMS.</span>
         </p>
+        </details>
       </div>
     </section>
 
@@ -546,7 +538,9 @@
           <p class="eyebrow">Rõ ràng &amp; minh bạch</p>
           <h2>Điều khoản tóm tắt</h2>
         </header>
-        <div class="terms-grid">
+        <details class="disclosure">
+          <summary>Đọc điều khoản tóm tắt (nhấn để mở)</summary>
+          <div class="terms-grid">
           <article class="term-card reveal">
             <span class="term-icon" aria-hidden="true"><svg class="icon"><use href="#i-refresh"/></svg></span>
             <h3>Dùng thử &amp; không hoàn tiền</h3>
@@ -572,7 +566,8 @@
             <h3>Dữ liệu &amp; quyền riêng tư</h3>
             <p>Chỉ thu thập thông tin cần thiết để cấp quyền, gắn thiết bị, cá nhân hóa bộ số/lịch và hỗ trợ. Không bán dữ liệu. Bạn có thể yêu cầu xóa dữ liệu (dịch vụ sẽ chấm dứt).</p>
           </article>
-        </div>
+          </div>
+        </details>
       </div>
     </section>
 
@@ -616,7 +611,7 @@
     <a class="btn btn-outline-light" id="mobile-zalo" href="https://zalo.me/" target="_blank" rel="noopener">
       <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg> Zalo
     </a>
-    <a class="btn btn-gold" href="#bat-dau">Dùng thử 0đ</a>
+    <a class="btn btn-gold js-zalo" href="https://zalo.me/0906919053">Cài hộ 0đ</a>
   </div>
 
   <noscript>

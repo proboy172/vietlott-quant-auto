@@ -19,22 +19,28 @@ Tài liệu này là **chuẩn thiết kế** và “design repo” nội bộ c
 - **Dễ hiểu cho mọi lứa tuổi (kể cả người lớn):** chữ to, tương phản cao, nút/bấm tối thiểu ~44px, bước/câu ngắn, mobile-first, nút “Chữ to”.
 - **Minh bạch & tuân thủ:** nhắc lại “không bán vé / không mua hộ / không đảm bảo trúng”, điều kiện Vietlott SMS, và quyền **tạm dừng/bật tắt tự động** bất cứ lúc nào để tránh gửi lệnh/mua vé ngoài ý muốn.
 
-## 2. Bố cục (layout) — thứ tự section (clarity-first)
-1. **Header** (sticky): logo, menu, nút “Chữ to”, CTA dùng thử → `#bat-dau`
-2. **Hero**: nêu rõ sản phẩm (tự gửi SMS tới 9969) + CTA dùng thử 0đ + checklist & khối “Cam kết minh bạch” + minh họa
-3. **Stats/FOMO**: jackpot (công khai), đồng hồ đếm ngược kỳ gần nhất, giá gói
-4. **Ticker** (marquee, thông điệp ngắn, có nhắc không bán vé)
-5. **Sản phẩm là gì** (`#san-pham`): 3 thẻ rõ ràng — “Công cụ làm gì / không làm gì / Tiền vé & kết quả”
-6. **Cách hoạt động** (`#cach-hoat-dong`): 3 bước + luồng tóm tắt (Bạn → Điện thoại → 9969 trừ tiền từ tài khoản của bạn)
-7. **Điều kiện cần có** (`#dieu-kien`): 4 điều kiện Vietlott SMS + nhắc tạm dừng bất cứ lúc nào
-8. **Lợi ích & kiểm soát** (`#loi-ich`): 4 thẻ (tự động, toàn quyền tạm dừng, số vé tùy ý, bộ số/lịch riêng)
-9. **Bảng giá** (`#bang-gia`): 1 gói 999.000đ trọn đời, dùng thử 7 ngày 0đ, giải thích “trọn đời”
-10. **Bắt đầu / chốt sale** (`#bat-dau`): 2 lộ trình — **Dùng thử 7 ngày 0đ (khuyên dùng)** và **Mua gói** — + form tạo nội dung CK, QR/CK, hỗ trợ/cấp link (trạng thái minh bạch)
-11. **Cài đặt** (`#cai-dat`): tab iPhone (Shortcuts) / Android, nhấn mạnh tự động hoàn toàn & cách tạm dừng
-12. **Kết quả tham khảo** (`#ket-qua`): kết quả công khai Vietlott, gallery ảnh chủ nhân Jackpot chính thức (có nguồn), lịch sử, disclaimer — **không** phải thành tích công cụ
-13. **FAQ** (`#hoi-dap`)
-14. **Điều khoản tóm tắt** (`#dieu-khoan`)
-15. **Hỗ trợ** (`#ho-tro`) + **Footer** + **Mobile dock**
+## 2. Bố cục (layout) — phễu ngắn, rõ (P0)
+
+> **Nguyên tắc P0 (2026-11-22):** bán **sự yên tâm & dịch vụ cài hộ**, không bán sự phức tạp kỹ thuật. Tránh hứa "3 bước tự làm" trong khi iPhone Shortcuts thực tế khó — hãy nói rõ "chúng tôi cài hộ qua Zalo ~5 phút". Một CTA duy nhất (.js-zalo) xuyên suốt trang. Không public số tài khoản giả.
+
+1. **Header** (sticky): logo, menu, nút "Chữ to", **1 CTA Zalo** (không aria-label trùng text).
+2. **Hero**: tiêu đề ngắn + CTA "Nhắn Zalo — cài hộ 0đ" + dòng ghi chú cài hộ 1-1 + 4 bullet ngắn + dải minh bạch.
+3. **Stats/FOMO**: jackpot công khai, countdown, giá Founder (1 CTA Zalo).
+4. **Ticker** + dải nhắc kỳ quay (1 CTA Zalo).
+5. **Sản phẩm là gì** (`#san-pham`): 3 thẻ "làm gì / không làm gì / tiền vé & kiểm soát".
+6. **Cách hoạt động** (`#cach-hoat-dong`): 3 bước ngắn (cài hộ → tự gửi → tạm dừng) + luồng Bạn → Điện thoại → 9969.
+7. **Điều kiện cần có** (`#dieu-kien`): 4 điều kiện Vietlott SMS.
+8. **Bảng giá** (`#bang-gia`): 1 gói 999.000đ, dùng thử 7 ngày, giải thích "trọn đời" (CTA Zalo).
+9. **Bắt đầu** (`#bat-dau`): dùng thử 0đ (ưu tiên) + form tối giản. **Khối thanh toán tự ẩn** khi `sepayQr`/bank còn placeholder.
+10. **Cài đặt** (`#cai-dat`): tab iPhone/Android, nhấn mạnh được cài hộ & tạm dừng.
+11. **Kết quả công khai** (`#ket-qua`): **thu gọn trong `<details class="disclosure">`** (mặc định đóng) — không chiếm ưu thế, không coi là thành tích công cụ.
+12. **FAQ** (`#hoi-dap`): **6 câu**, `<details>`.
+13. **Điều khoản** (`#dieu-khoan`): **thu gọn trong `<details>`**.
+14. **Hỗ trợ + Footer + Mobile dock** (dock: 2 nút đều về Zalo).
+
+**Đã bỏ:** section "Lợi ích & kiểm soát" (`#loi-ich`) trùng với clarity card; bỏ lặp disclaimer ở nhiều nơi (giữ 1 dải + footer).
+
+Mục tiêu: mobile < ~14.000px (từ ~24.000px), desktop < ~11.000px (từ ~15.000px); Lighthouse A11y/Best/SEO = 1.0/1.0/1.0; không tràn ngang; không text < 12px.
 
 - `.container` (max 1160px), `.section` / `.section--soft` / `.section--dark`, `.container--narrow` cho khối đọc tập trung.
 - Mobile-first: 1 cột → 2/3 cột ở breakpoint lớn. **Không** để tràn ngang; phần tử trang trí (orb, ticker track) phải `overflow` được chứa và không tạo overflow trang (`scrollWidth <= clientWidth`).
@@ -54,7 +60,7 @@ Quy tắc: tối đa 2 màu nhấn (ruby + gold). Trên nền tối dùng trắn
 - **Font duy nhất:** `Be Vietnam Pro` (Google Fonts, VN đầy đủ). Fallback: `"Segoe UI", Roboto, Arial, sans-serif`.
 - Cỡ gốc: `17px` (mobile) → `18px` (≥680px). `html.big-text`: `20px` → `22px` (toggle A+, lưu `localStorage`).
 - H1 `clamp(2.35rem,8.2vw,4.25rem)` weight 900; H2 `clamp(1.8rem,5vw,2.9rem)`; body ~1rem, `line-height: 1.65`.
-- Không dùng font serif trang trí cho nội dung chính. UI nhỏ (badge/kicker/nhãn) không nên < ~0.62rem để giữ đọc được.
+- Không dùng font serif trang trí cho nội dung chính. UI nhỏ (badge/kicker/nhãn, ball, code) **tối thiểu 0.8rem ≈ 13px trên mobile** — từng đo thực tế; không để chữ < 12px (đặc biệt người lớn tuổi).
 
 ## 5. Thành phần (components)
 - **Button:** pill, ≥44px (CTA lớn ≥56px), `.btn-gold` (chính), `.btn-outline-light`, `.btn-dark`, `.btn-light`, `.btn-ghost`. Hover/active rõ.
@@ -67,7 +73,8 @@ Quy tắc: tối đa 2 màu nhấn (ruby + gold). Trên nền tối dùng trắn
 - **Result board + winners gallery:** dữ liệu công khai Vietlott, logo thật (`landing/assets/*.png`), ảnh chủ nhân Jackpot từ `winners.js`/`CONFIG.draws.images` (chỉ nguồn chính thức/có quyền, có ghi nguồn); **không bịa**, không coi là thành tích công cụ.
 - **Tabs (iPhone/Android):** ARIA tablist/tabpanel, phím ← →.
 - **Form:** label rõ, báo lỗi `aria-live`, nút copy, nội dung CK `AUTOFLOW <SĐT>`.
-- **FAQ:** `<details>/<summary>` native.
+- **FAQ:** `<details>/<summary>` native (6 câu).
+- **Disclosure** (`.disclosure`): khối thu gọn cho kết quả công khai & điều khoản; `<summary>` ≥44px, có dấu +/−. Mặc định đóng.
 
 ## 6. Icon & hình ảnh
 - **Icon:** SVG sprite nội bộ trong `index.html` (`<symbol id="i-...">`), stroke nhất quán — **không dùng emoji** trong UI.
@@ -97,4 +104,7 @@ Quy tắc: tối đa 2 màu nhấn (ruby + gold). Trên nền tối dùng trắn
 1. Sửa token trong `:root` trước, không rải giá trị rời rạc. Dùng component/icon sprite có sẵn; thêm mới thì ghi vào file này.
 2. Giữ **phễu rõ ràng**: giải thích công cụ là gì/không là gì → cách hoạt động + điều kiện → giá → bắt đầu (dùng thử 0đ ưu tiên) → cài đặt → tham khảo công khai → FAQ/điều khoản/hỗ trợ. Tránh đưa kết quả/ảnh trúng thưởng như bằng chứng của công cụ.
 3. Kiểm tra: 360/390/768/1024/1280, nút “Chữ to”, `node --check landing/site.js landing/draws.js landing/winners.js`, không lỗi console, không emoji, không tràn ngang, form/copy/countdown/tab chạy.
+   - Mỗi lần sửa CSS/JS phải **tăng `?v=` trong `index.html`** (hiện `v=18`) nếu không browser dùng file cache cũ.
+   - Chạy Lighthouse: A11y/Best/SEO phải 1.0; kiểm tra `label-content-name-mismatch` (không đặt `aria-label` trùng/khác text hiển thị) và `color-contrast` (footer-note ≥4.5:1).
+   - Kiểm tra placeholder: khối thanh toán phải ẩn khi chưa có SePay/bank thật; không public số TK giả.
 4. Giữ tuyên bố minh bạch (không bán vé, không mua hộ, không đảm bảo trúng, tạm dừng bất cứ lúc nào) dễ thấy ở hero, clarity, điều kiện, bắt đầu, footer/disclaimer.

@@ -42,7 +42,7 @@
   --container: 1160px;
   --narrow: 840px;
   --pad: clamp(1rem, 4.5vw, 2rem);
-  --section-y: clamp(3.75rem, 8vw, 6.5rem);
+  --section-y: clamp(2.75rem, 6vw, 5.25rem);
   --font: "Be Vietnam Pro", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --ease: cubic-bezier(.2,.7,.2,1);
 }
@@ -103,7 +103,7 @@ code { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", m
   fill: none; stroke: currentColor; stroke-width: 1.85; stroke-linecap: round; stroke-linejoin: round;
 }
 .muted { color: var(--muted); }
-.small { font-size: .82rem; }
+.small { font-size: .92rem; }
 .text-gold { color: var(--gold-400); }
 .text-green { color: var(--green); }
 
@@ -673,6 +673,25 @@ code { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", m
 }
 @media (max-width: 379px) { .brand-text { display: none; } }
 @media (min-width: 1180px) { .hero-inner { gap: 4.6rem; } }
+/* ---------- P0: chữ dễ đọc & khối thu gọn ---------- */
+.app-kicker, .stat-label, .price-ribbon, .price-list-title, .start-badge,
+.result-label, .result-source, .draw-badge, .history-note, .game-tag,
+.history-date, .special-label, .app-meta span, .brand-text small {
+  font-size: .8rem;
+}
+.ball, .app-cmd code { font-size: .86rem; }
+.balls--hero .ball { font-size: clamp(.82rem, 2.6vw, .95rem); }
+.mini-balls .ball { font-size: .8rem; }
+.hero-note { margin: .35rem 0 .9rem; font-size: .92rem; color: var(--muted); }
+.site-footer .footer-note { color: #cfc0b7; }
+.disclosure { border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,255,255,.55); padding: 0 1.1rem; margin-top: 1rem; }
+.disclosure > summary { cursor: pointer; list-style: none; min-height: 3rem; display: flex; align-items: center; font-weight: 800; font-size: .95rem; color: var(--ruby-950); }
+.disclosure > summary::-webkit-details-marker { display: none; }
+.disclosure > summary::after { content: '+'; margin-left: auto; font-size: 1.4rem; color: var(--gold-600); }
+.disclosure[open] > summary::after { content: '\2212'; }
+.disclosure[open] > summary { border-bottom: 1px solid var(--line); }
+@media (max-width: 639px) { .disclosure { padding: 0 .85rem; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .reveal { opacity: 1; transform: none; }

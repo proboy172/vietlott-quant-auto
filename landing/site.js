@@ -45,6 +45,7 @@ const CONFIG = {
   },
 
   supportZalo: 'https://zalo.me/0906919053',
+  demoVideoUrl: '', // slot video/ảnh hướng dẫn cài hộ (điền khi có thật)
   contact: '',
   shortcutUrl: '',
   androidUrl: '',
@@ -58,9 +59,9 @@ const CONFIG = {
   },
 
   steps: [
-    { t: 'Đăng ký, để AI chọn bộ số & kích hoạt 1 thiết bị', d: 'Bạn cung cấp số điện thoại Vietlott SMS, chọn Mega 6/45 hoặc Power 6/55, số lượng vé (không giới hạn, tùy số dư) và bộ số (AI gợi ý tối ưu hoặc bạn chọn). Mỗi gói được kích hoạt gắn với 1 thiết bị của bạn (1 gói/1 số/1 máy) và nhận hướng dẫn riêng qua Zalo.' },
-    { t: 'Cài đặt 1 lần & bật tự động', d: 'Cài đặt một lần trên Android (cấp quyền SMS) hoặc iPhone (Phím tắt/Shortcuts) trên chính thiết bị đã kích hoạt. Sau đó điện thoại tự gửi, bạn không cần bấm mỗi kỳ.' },
-    { t: 'Tự động 24/7, đúng lịch — bạn luôn kiểm soát', d: 'Đến kỳ quay, thiết bị đã kích hoạt tự gửi SMS tới 9969 đúng giờ — không quên, không sai cú pháp. Bạn vẫn toàn quyền tạm dừng/bật tắt tự động bất cứ lúc nào. Không chia sẻ quyền sử dụng cho thiết bị/người khác.' }
+    { t: 'Cài hộ qua Zalo (5 phút)', d: 'Bạn nhắn Zalo, chúng tôi kiểm tra điều kiện Vietlott SMS của bạn và cài đặt/bật tự động giúp trên chính điện thoại của bạn.' },
+    { t: 'Bật tự động — máy tự gửi 9969', d: 'Đến kỳ quay, điện thoại tự gửi SMS đúng cú pháp (645/655) tới 9969 từ đúng số Vietlott SMS của bạn. Không cần bấm mỗi lần.' },
+    { t: 'Bạn tạm dừng/bật lại anytime', d: 'Tắt tự động là ngừng gửi lệnh ngay. Bạn chủ động số lượng vé và có thể đổi cấu hình qua Zalo.' }
   ],
 
   benefits: [
@@ -71,32 +72,24 @@ const CONFIG = {
   ],
 
   priceList: [
-    'Dùng thử 7 ngày miễn phí (0đ) — trải nghiệm trước khi quyết định',
-    'AI tính toán & gợi ý bộ số theo thuật toán tối ưu, riêng cho từng khách',
-    'Tự động gửi hoàn toàn 24/7 trên Android & iPhone — không cần thao tác hằng ngày',
-    'Không bỏ lỡ kỳ quay, không quên, không sai cú pháp lệnh SMS',
-    'Số lượng vé mỗi kỳ không giới hạn (miễn đủ số dư/hạn mức Vietlott SMS)',
-    'Gói gắn 1 khách / 1 số Vietlott SMS / 1 thiết bị đang hoạt động (không dùng chung)',
-    'Tạm dừng/bật tắt bất cứ lúc nào — bạn toàn quyền kiểm soát',
-    'Hỗ trợ cài đặt & xử lý sự cố, vận hành và cập nhật trong 36 tháng (gói Trọn đời)',
-    'Đổi thiết bị: 150.000đ/lần (xác minh, thu hồi máy cũ; có thời gian chờ/giới hạn để hạn chế lạm dụng)'
+    'Dùng thử 7 ngày 0đ — hỗ trợ cài hộ qua Zalo',
+    'AI gợi ý bộ số riêng cho từng khách (hoặc bạn tự chọn)',
+    'Tự động gửi SMS 24/7 trên Android & iPhone — cài một lần',
+    'Không quên kỳ, không sai cú pháp; số vé tùy ý (tùy số dư)',
+    '1 gói = 1 khách / 1 SĐT Vietlott SMS / 1 thiết bị',
+    'Vận hành & cập nhật 36 tháng; đổi máy 150.000đ/lần'
   ],
 
   faq: [
-    { q: 'Công cụ này là gì? Có phải nơi bán vé số không?', a: 'Không. Đây là công cụ hỗ trợ tự động soạn và gửi tin nhắn SMS tới tổng đài Vietlott 9969 từ chính điện thoại/số bạn đã đăng ký Vietlott SMS. Chúng tôi không bán vé, không mua hộ, không nhận thưởng hộ. Tiền vé (nếu gửi thành công) do Vietlott trừ từ tài khoản thanh toán của chính bạn.' },
-    { q: 'AI tính toán “bộ số tối ưu” hoạt động như thế nào?', a: 'Hệ thống AI của dự án phân tích và tính toán để gợi ý bộ số theo thuật toán tối ưu, được cá nhân hóa cho từng khách hàng (theo loại chơi, lịch, cấu hình bạn chọn). Bạn vẫn có thể tự chọn/đổi bộ số và số lượng vé. Đây là công cụ hỗ trợ chọn số và tự động gửi lệnh — không can thiệp kết quả quay số.' },
-    { q: 'Có thật sự tự động 24/7, không cần thao tác gì thêm không?', a: 'Có. Sau khi cài đặt một lần và bật tự động, điện thoại sẽ tự gửi SMS đúng lịch 24/7 mà bạn không cần bấm mỗi kỳ: trên Android khi cấp quyền gửi SMS, trên iPhone qua Phím tắt (Shortcuts) và tự động hóa. Tùy thiết bị/phiên bản/cài đặt, cần bật đúng quyền và tự động hóa; chúng tôi sẽ hướng dẫn khi cài đặt.' },
-    { q: 'Không giới hạn số vé nghĩa là sao?', a: 'Bạn có thể đặt bao nhiêu vé tùy ý mỗi kỳ — công cụ không đặt trần số lượng. Việc mua được bao nhiêu vé phụ thuộc vào số dư/hạn mức tài khoản Vietlott SMS và quy định nhận lệnh của Vietlott. Bạn có thể thay đổi số lượng vé bất cứ lúc nào.' },
-    { q: 'Tự động và không bỏ lỡ kỳ quay có giúp trúng cao hơn không?', a: 'Không có gì đảm bảo trúng thưởng vì xổ số là ngẫu nhiên. Lợi ích thực tế của công cụ là: AI gợi ý bộ số tối ưu theo thuật toán, tự động gửi đúng lịch 24/7, không quên/không sai cú pháp — giúp bạn tham gia đều đặn và không tự bỏ lỡ cơ hội của mỗi kỳ theo lựa chọn của mình. Công cụ không cam kết trúng thưởng hay lợi nhuận.' },
-    { q: 'Mỗi gói dùng được trên mấy điện thoại? Có được chia sẻ không?', a: 'Mỗi gói áp dụng cho 1 khách hàng / 1 số điện thoại Vietlott SMS / 1 thiết bị đang hoạt động tại một thời điểm. Quyền sử dụng được gắn với thiết bị đã kích hoạt để đảm bảo công bằng và bảo vệ dịch vụ, vì vậy không dùng chung, không chuyển nhượng, không chia sẻ cho người khác. Trường hợp chia sẻ/lạm dụng, dịch vụ có thể bị tạm ngưng theo điều khoản.' },
-    { q: 'Tôi đổi điện thoại thì sao? Phí đổi máy thế nào?', a: 'Nếu bạn đổi/nâng cấp/mất điện thoại hoặc cài lại làm mất kích hoạt, chúng tôi hỗ trợ chuyển sang thiết bị mới với phí 150.000đ mỗi lần đổi. Khi đổi máy: cần liên hệ hỗ trợ (Zalo) để xác minh và cung cấp mã giao dịch phí, thiết bị cũ sẽ được thu hồi/vô hiệu ngay và bạn được kích hoạt thiết bị mới. Để hạn chế lạm dụng, việc đổi máy có thời gian chờ tối thiểu giữa các lần và giới hạn tần suất (trường hợp đặc biệt sẽ được xem xét có kiểm soát).' },
-    { q: 'Nếu không muốn mua vé nữa thì tạm dừng thế nào?', a: 'Bạn toàn quyền tạm dừng/bật tắt tự động bất cứ lúc nào: tắt Phím tắt/tự động hóa trên iPhone, tắt tự động trong ứng dụng/cài đặt trên Android, hoặc nhắn Zalo để được hỗ trợ tắt ngay. Khi đã tạm dừng, hệ thống sẽ không gửi lệnh mua vé nữa.' },
-    { q: 'Tôi cần chuẩn bị gì trước khi dùng?', a: 'Bạn cần: (1) tài khoản dự thưởng Vietlott SMS, (2) tài khoản/thẻ thanh toán mặc định, (3) đủ số dư/hạn mức mua số vé bạn chọn, (4) dùng đúng số điện thoại đã đăng ký Vietlott SMS, và (5) bật quyền/tự động hóa cần thiết trên điện thoại. Thiếu điều kiện nào thì Vietlott có thể không nhận lệnh.' },
-    { q: 'Bộ số/cấu hình có trùng với người khác không?', a: 'Bộ số và cấu hình (AI gợi ý hoặc bạn chọn, loại vé, lịch, số lượng) được thiết lập riêng cho từng khách hàng theo thông tin bạn cung cấp, không dùng chung một danh sách cho tất cả mọi người.' },
-    { q: 'Dùng thử 7 ngày 0đ hoạt động ra sao? Giá có đổi không?', a: 'Bạn dùng thử 7 ngày miễn phí, chưa cần thanh toán. Nếu thấy phù hợp, bạn mua gói Trọn đời 999.000đ (một lần). Giá Founder 999.000đ có thể tăng trong tương lai; khách đã mua vẫn giữ quyền lợi gói Trọn đời theo điều khoản đã công bố.' },
-    { q: 'Đã gửi tin nhưng không nhận phản hồi từ 9969 thì sao?', a: 'Hãy kiểm tra: đúng số đã đăng ký, có tài khoản thanh toán mặc định, đủ số dư, còn trong giờ nhận lệnh, và cú pháp đúng. Đồng thời kiểm tra quyền SMS/tự động (Android) hoặc Phím tắt/tự động hóa (iPhone) và kết nối mạng/nhà mạng. Nếu vẫn không được, nhắn Zalo để được hỗ trợ.' }
+    { q: 'Công cụ này là gì? Có bán vé số không?', a: 'Không. Đây là công cụ hỗ trợ soạn và gửi SMS tới 9969 từ chính số bạn đã đăng ký Vietlott SMS. Chúng tôi không bán vé, không mua hộ, không giữ tiền. Tiền vé (nếu gửi thành công) do Vietlott trừ từ tài khoản của bạn.' },
+    { q: 'Tôi không rành công nghệ thì cài được không?', a: 'Có. Bạn chỉ cần nhắn Zalo — chúng tôi kiểm tra điều kiện và cài hộ trong khoảng 5 phút trên điện thoại của bạn. Sau đó máy tự chạy, bạn không cần thao tác hằng ngày.' },
+    { q: 'Có đảm bảo trúng thưởng không?', a: 'Không. Xổ số là ngẫu nhiên. Lợi ích của công cụ là AI gợi ý bộ số, tự động gửi đúng lịch, không quên/không sai cú pháp — giúp bạn tham gia đều đặn theo lựa chọn của mình. Không cam kết trúng hay lợi nhuận.' },
+    { q: 'Mỗi gói dùng mấy máy? Có chia sẻ được không?', a: 'Mỗi gói áp dụng cho 1 khách / 1 SĐT Vietlott SMS / 1 thiết bị đang hoạt động. Không dùng chung hay chuyển nhượng. Đổi máy: 150.000đ/lần, xác minh + mã GD, thu hồi máy cũ, có thời gian chờ giữa các lần.' },
+    { q: 'Tôi cần chuẩn bị gì trước khi dùng?', a: 'Số điện thoại đã đăng ký Vietlott SMS, tài khoản/thẻ thanh toán mặc định, đủ số dư/hạn mức và gửi trong giờ nhận lệnh. Thiếu điều kiện thì Vietlott có thể không nhận lệnh.' },
+    { q: 'Dùng thử 7 ngày 0đ và "trọn đời" nghĩa là sao?', a: 'Dùng thử 7 ngày miễn phí, chưa cần thanh toán. Gói Trọn đời 999.000đ thanh toán một lần, không phí định kỳ, kèm vận hành/cập nhật 36 tháng (giá có thể tăng; khách cũ giữ quyền lợi).' }
   ]
 };
+
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -159,6 +152,11 @@ function render() {
     const a = $(sel);
     if (a && !a.dataset.dynamic) a.href = zalo;
   });
+  $$('.js-zalo').forEach((a) => { a.href = zalo; });
+
+  // Ẩn khối thanh toán khi vẫn là placeholder (không public số TK giả)
+  const payPanel = $('#payment-panel');
+  if (payPanel && !CONFIG.sepayQr && /sẽ cập nhật/i.test(CONFIG.bank.name)) payPanel.hidden = true;
 
   const contact = $('#contact-line');
   if (contact) {
@@ -415,7 +413,6 @@ function bindFontToggle() {
   const apply = (on) => {
     document.documentElement.classList.toggle('big-text', on);
     btn.setAttribute('aria-pressed', String(on));
-    btn.setAttribute('aria-label', on ? 'Tắt chữ to' : 'Bật chữ to');
     btn.innerHTML = on
       ? '<span class="ft-icon">A−</span><span class="ft-text">Chữ vừa</span>'
       : '<span class="ft-icon">A+</span><span class="ft-text">Chữ to</span>';
