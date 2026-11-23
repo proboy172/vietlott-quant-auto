@@ -1,72 +1,12 @@
 {
-  "date": "2026-11-22",
-  "status": "ACTIVE_BUY",
-  "primary_matrix_game": "Mega 6/45",
-  "detected_jackpot_billion": 12.0,
-  "total_cost_vnd": 20000,
-  "decision_summary": "[Mega 6/45] Tín hiệu XÁC SUẤT TỐT (Top3 Score=1.208, 0 bóng Overdue) -> Quyết định đầu tư 2 vé (20.000đ) để phân tán rủi ro, phủ 9 số. (Chi phi: 20,000d)",
-  "sms_commands": [
-    "645 K1 S 01 10 14 20 36 41",
-    "645 K1 S 07 14 18 20 40 41"
-  ],
-  "tickets_detail": [
-    {
-      "game": "Mega 6/45",
-      "detail": {
-        "ticket_index": 1,
-        "role": "Trục chính (Core Quant Anchor)",
-        "numbers": [
-          1,
-          10,
-          14,
-          20,
-          36,
-          41
-        ],
-        "formatted": "01 10 14 20 36 41",
-        "quant_score": 8.2548,
-        "metrics": {
-          "sum": 122,
-          "odd_even": "2:4",
-          "low_high": "4:2",
-          "ac_value": 10,
-          "anti_crowd_gt31": 2,
-          "decades": 5,
-          "consec_pairs": 0,
-          "unique_last_digits": 4
-        },
-        "sms": "645 K1 S 01 10 14 20 36 41"
-      }
-    },
-    {
-      "game": "Mega 6/45",
-      "detail": {
-        "ticket_index": 2,
-        "role": "Phân tán bù trừ (Diversity Hedge)",
-        "numbers": [
-          7,
-          14,
-          18,
-          20,
-          40,
-          41
-        ],
-        "formatted": "07 14 18 20 40 41",
-        "quant_score": 8.0929,
-        "metrics": {
-          "sum": 140,
-          "odd_even": "2:4",
-          "low_high": "4:2",
-          "ac_value": 10,
-          "anti_crowd_gt31": 2,
-          "decades": 4,
-          "consec_pairs": 1,
-          "unique_last_digits": 5
-        },
-        "sms": "645 K1 S 07 14 18 20 40 41"
-      }
-    }
-  ],
+  "date": "2026-11-23",
+  "status": "REST_DAY",
+  "primary_matrix_game": "Nghi quay (Thu 2)",
+  "detected_jackpot_billion": 0.0,
+  "total_cost_vnd": 0,
+  "decision_summary": "Hom nay khong co lich quay (nghi).",
+  "sms_commands": [],
+  "tickets_detail": [],
   "sensitive": true,
   "distribution": "licensed_device_api_only",
   "config_applied": {
