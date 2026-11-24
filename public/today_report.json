@@ -1,12 +1,72 @@
 {
-  "date": "2026-11-23",
-  "status": "REST_DAY",
-  "primary_matrix_game": "Nghi quay (Thu 2)",
-  "detected_jackpot_billion": 0.0,
-  "total_cost_vnd": 0,
-  "decision_summary": "Hom nay khong co lich quay (nghi).",
-  "sms_commands": [],
-  "tickets_detail": [],
+  "date": "2026-11-24",
+  "status": "ACTIVE_BUY",
+  "primary_matrix_game": "Power 6/55",
+  "detected_jackpot_billion": 30.0,
+  "total_cost_vnd": 20000,
+  "decision_summary": "[Power 6/55] Tín hiệu XÁC SUẤT TỐT (Top3 Score=1.207, 0 bóng Overdue) -> Quyết định đầu tư 2 vé (20.000đ) để phân tán rủi ro, phủ 9 số. (Chi phi: 20,000d)",
+  "sms_commands": [
+    "655 K1 S 01 18 20 36 41 50",
+    "655 K1 S 13 20 23 36 41 45"
+  ],
+  "tickets_detail": [
+    {
+      "game": "Power 6/55",
+      "detail": {
+        "ticket_index": 1,
+        "role": "Trục chính (Core Quant Anchor)",
+        "numbers": [
+          1,
+          18,
+          20,
+          36,
+          41,
+          50
+        ],
+        "formatted": "01 18 20 36 41 50",
+        "quant_score": 8.4689,
+        "metrics": {
+          "sum": 166,
+          "odd_even": "2:4",
+          "low_high": "3:3",
+          "ac_value": 10,
+          "anti_crowd_gt31": 3,
+          "decades": 6,
+          "consec_pairs": 0,
+          "unique_last_digits": 4
+        },
+        "sms": "655 K1 S 01 18 20 36 41 50"
+      }
+    },
+    {
+      "game": "Power 6/55",
+      "detail": {
+        "ticket_index": 2,
+        "role": "Phân tán bù trừ (Diversity Hedge)",
+        "numbers": [
+          13,
+          20,
+          23,
+          36,
+          41,
+          45
+        ],
+        "formatted": "13 20 23 36 41 45",
+        "quant_score": 8.3207,
+        "metrics": {
+          "sum": 178,
+          "odd_even": "4:2",
+          "low_high": "3:3",
+          "ac_value": 10,
+          "anti_crowd_gt31": 3,
+          "decades": 4,
+          "consec_pairs": 0,
+          "unique_last_digits": 5
+        },
+        "sms": "655 K1 S 13 20 23 36 41 45"
+      }
+    }
+  ],
   "sensitive": true,
   "distribution": "licensed_device_api_only",
   "config_applied": {
