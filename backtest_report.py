@@ -4,6 +4,7 @@ Chạy: python backtest_report.py --window 300
 """
 import argparse
 import datetime
+import math
 import sys
 from pathlib import Path
 
@@ -36,8 +37,14 @@ def run_single_ticket_backtest(game_code: str, window: int) -> dict:
 
     n = len(draws) - start
     theo = theoretical_single_ticket_probs(GAME_CONFIGS[game_code].max_ball)
-    expected_ge2 = sum(theo[m] for m in range(2, 7)) * n
-    expected_ge3 = sum(theo[m] for m in range(3, 7)) * n
+    p_ge2 = sum(theo[m] for m in range(2, 7))
+    p_ge3 = sum(theo[m] for m in range(3, 7))
+    expected_ge2 = p_ge2 * n
+    expected_ge3 = p_ge3 * n
+    emp_ge3 = sum(hits[m] for m in range(3, 7))
+    # Kiểm định z hai phía cho tỷ lệ trúng giải so với ngẫu nhiên.
+    z = (emp_ge3 - expected_ge3) / math.sqrt(max(1e-12, n * p_ge3 * (1 - p_ge3)))
+    p_value = 2 * (1 - 0.5 * (1 + math.erf(abs(z) / math.sqrt(2))))
     return {
         "game": GAME_CONFIGS[game_code].name,
         "window": n,
@@ -45,8 +52,10 @@ def run_single_ticket_backtest(game_code: str, window: int) -> dict:
         "hits": hits,
         "empirical_ge2": sum(hits[m] for m in range(2, 7)),
         "expected_ge2": round(expected_ge2, 2),
-        "empirical_ge3": sum(hits[m] for m in range(3, 7)),
+        "empirical_ge3": emp_ge3,
         "expected_ge3": round(expected_ge3, 2),
+        "z_ge3": round(z, 3),
+        "p_value_ge3": round(p_value, 4),
     }
 
 
@@ -61,13 +70,13 @@ def build_markdown(results: dict, morphologies: dict, window: int) -> str:
         "",
         "## 1. Kết quả trúng số",
         "",
-        "| Trò chơi | Số kỳ | Trúng >=2 số (AI) | Ngẫu nhiên | Trúng >=3 số (có giải) | Ngẫu nhiên |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| Trò chơi | Số kỳ | Trúng >=2 số (AI) | Ngẫu nhiên | Trúng >=3 số (có giải) | Ngẫu nhiên | z | p-value |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for code, r in results.items():
         lines.append(
             f"| {r['game']} | {r['window']} | {r['empirical_ge2']} | {r['expected_ge2']} "
-            f"| {r['empirical_ge3']} | {r['expected_ge3']} |"
+            f"| {r['empirical_ge3']} | {r['expected_ge3']} | {r['z_ge3']} | {r['p_value_ge3']} |"
         )
     lines += [
         "",
@@ -92,9 +101,9 @@ def build_markdown(results: dict, morphologies: dict, window: int) -> str:
         "",
         "## 3. Kết luận",
         "",
-        "- Không có bằng chứng engine vượt vé ngẫu nhiên một cách có ý nghĩa. Một trò có thể cao hơn "
-        "nhẹ, trò kia thấp hơn kỳ vọng; với mẫu vài trăm kỳ cả hai đều nằm trong nhiễu thống kê. "
-        "Cần mẫu lớn hơn và kiểm định ý nghĩa thống kê mới có thể khẳng định.",
+        "- Kiểm định z hai phía (p-value trong bảng): nếu **p > 0,05** thì sai lệch so với ngẫu nhiên "
+        "**không có ý nghĩa thống kê** — tức là không thể nói engine thắng vé random. "
+        "Với mẫu vài trăm kỳ, hầu hết kết quả sẽ rơi vào trường hợp này.",
         "- `quant_score` là tổng trọng số tự đặt (Bayesian/Markov/Gap/pair/triplet...), **không phải xác suất**. "
         "Mỗi tổ hợp 6 số vẫn có xác suất đúng 1/C(45,6) hoặc 1/C(55,6).",
         "- Bộ lọc hình thái có tác dụng thực tế duy nhất: tránh các bộ số đông người chọn, "
