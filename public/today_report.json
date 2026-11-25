@@ -52,7 +52,7 @@
           41
         ],
         "formatted": "01 10 14 27 36 41",
-        "quant_score": 16.1995,
+        "quant_score": 8.0838,
         "metrics": {
           "sum": 129,
           "odd_even": "3:3",
@@ -69,7 +69,7 @@
   ],
   "sensitive": true,
   "distribution": "licensed_device_api_only",
-  "generated_at": "2026-11-25T12:46:35+07:00",
+  "generated_at": "2026-11-25T12:50:08+07:00",
   "rotation_date": "2026-11-25",
   "latest_draw_date": "2026-11-22",
   "avoided_recent_tickets": true,
