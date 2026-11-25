@@ -462,11 +462,13 @@ def generate_2_tickets_diversity_optimal(stats: dict) -> dict:
         if overlap in (2, 3):
             # Thưởng cho việc mở rộng không gian số mà vẫn bảo tồn điểm quant cao
             joint_score = best_t1[0] + sc + (3 - overlap) * 0.15
-            pair_candidates.append((joint_score, tk, met))
+            # Phần tử cuối là điểm cá nhân (dùng để báo cáo); phần tử đầu là điểm chung.
+            pair_candidates.append((joint_score, tk, met, sc))
 
     best_t2 = (_pick_daily_best(pair_candidates, stats, key_func=lambda c: ticket_key(c[1]),
                                 epsilon=0.10)
-               if pair_candidates else valid_candidates[1])
+               if pair_candidates
+               else (*valid_candidates[1], valid_candidates[1][0]))
 
     tickets = [
         {
@@ -483,7 +485,7 @@ def generate_2_tickets_diversity_optimal(stats: dict) -> dict:
             "role": "Phân tán bù trừ (Diversity Hedge)",
             "numbers": best_t2[1],
             "formatted": " ".join(f"{n:02d}" for n in best_t2[1]),
-            "quant_score": round(best_t2[0], 4),
+            "quant_score": round(best_t2[3], 4),
             "metrics": best_t2[2],
             "sms": f"{cfg.code} K1 S " + " ".join(f"{n:02d}" for n in best_t2[1]),
         },
