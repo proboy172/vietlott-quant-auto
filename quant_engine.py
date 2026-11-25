@@ -587,7 +587,18 @@ def generate_3_tickets_abbreviated_wheel(stats: dict) -> dict:
 
                 strict_pass_count = int(p1) + int(p2) + int(p3)
                 if strict_pass_count < 2:
-                    continue
+                    # Fallback: một số giai đoạn lịch sử không có dàn nào đạt 2/3 vé
+                    # strict. Thử bộ lọc nới lỏng (vẫn cần ít nhất 1 vé strict/relaxed).
+                    pr1, mr1 = check_morphology_filter(t1, cfg, strict=False)
+                    pr2, mr2 = check_morphology_filter(t2, cfg, strict=False)
+                    pr3, mr3 = check_morphology_filter(t3, cfg, strict=False)
+                    if int(pr1) + int(pr2) + int(pr3) < 1:
+                        continue
+                    m1 = m1 if p1 else mr1
+                    m2 = m2 if p2 else mr2
+                    m3 = m3 if p3 else mr3
+                    p1, p2, p3 = p1 or pr1, p2 or pr2, p3 or pr3
+                    strict_pass_count = int(p1) + int(p2) + int(p3)
 
                 s1 = score_single_ticket(t1, stats)
                 s2 = score_single_ticket(t2, stats)

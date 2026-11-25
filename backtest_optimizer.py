@@ -70,7 +70,11 @@ def run_walk_forward_backtest(game_code: str, test_window: int = 200) -> dict:
         history_slice = draws[:idx]
         actual_win = set(draws[idx]["main"])
 
-        stats = analyze_historical_stats(game_code, draws_subset=history_slice)
+        stats = analyze_historical_stats(
+            game_code,
+            draws_subset=history_slice,
+            target_date=draws[idx].get("date"),
+        )
         plan_1 = generate_1_ticket_optimal(stats)
         plan_3 = generate_3_tickets_abbreviated_wheel(stats)
 
