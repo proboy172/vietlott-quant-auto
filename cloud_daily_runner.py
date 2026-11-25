@@ -34,13 +34,17 @@ RECENT_STATE_PATH = BASE_DIR / "data" / "last_published.json"
 RECENT_WINDOW = 5  # loại các vé đã phát trong 5 ngày gần nhất
 
 
-def _load_recent_ticket_keys(avoid_recent: bool) -> List[str]:
-    """Đọc các tổ hợp đã phát gần đây để daily rotation không gửi lại vé cũ."""
+def _load_recent_ticket_keys(avoid_recent: bool, target_date: str = None) -> List[str]:
+    """Đọc các tổ hợp đã phát gần đây để daily rotation không gửi lại vé cũ.
+
+    Bỏ qua các entry cùng ngày mục tiêu để chạy lại trong ngày vẫn ra đúng 1 lệnh.
+    """
     if not avoid_recent or not RECENT_STATE_PATH.exists():
         return []
     try:
         state = json.loads(RECENT_STATE_PATH.read_text(encoding="utf-8"))
-        entries = state.get("recent", [])[-RECENT_WINDOW:]
+        entries = [e for e in state.get("recent", [])
+                   if str(e.get("date")) != str(target_date)][-RECENT_WINDOW:]
         keys: List[str] = []
         for entry in entries:
             for sms in entry.get("sms_commands", []):
@@ -240,7 +244,7 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
             "Từ chối ghi đè today_sms.txt/today_report.json."
         )
     schedule_game = get_today_game_code(today)
-    exclude_keys = _load_recent_ticket_keys(avoid_recent)
+    exclude_keys = _load_recent_ticket_keys(avoid_recent, target_date=str(today))
     latest_draw_date = None
 
     chosen_game = cfg_in.get("game", "auto")
