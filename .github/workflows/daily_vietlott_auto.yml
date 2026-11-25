@@ -22,12 +22,33 @@ jobs:
           python-version: '3.12'
 
       - name: Run Quantitative Engine & Generate SMS Commands for 9969
-        run: python cloud_daily_runner.py --out-dir public
+        run: python cloud_daily_runner.py --out-dir public --avoid-recent
+
+      - name: Verify freshness (no stale commands published)
+        run: |
+          python - <<'PY'
+          import datetime
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("public/today_report.json").read_text(encoding="utf-8"))
+          today = datetime.datetime.now(
+              datetime.timezone(datetime.timedelta(hours=7))
+          ).date().isoformat()
+          if report.get("date") != today:
+              raise SystemExit(f"STALE OUTPUT: report date {report.get('date')} != today {today}")
+          latest = report.get("latest_draw_date")
+          if latest:
+              age = (datetime.date.fromisoformat(today) - datetime.date.fromisoformat(latest)).days
+              if age > 7:
+                  print(f"WARNING: lich su ket qua da {age} ngay chua cap nhat: {latest}")
+          print(f"Fresh plan {report['date']}: {report.get('sms_commands')}")
+          PY
 
       - name: Commit & Push today_sms.txt for iPhone Shortcuts
         run: |
           git config user.name "vietlott-quant-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add public/today_sms.txt public/today_report.json data/*.jsonl
+          git add public/today_sms.txt public/today_report.json public/today_date.txt data/*.jsonl data/last_published.json
           git diff --staged --quiet || git commit -m "chore(auto): update daily Vietlott SMS ticket commands"
           git push

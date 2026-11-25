@@ -1,9 +1,10 @@
+import datetime
 import hashlib
 import itertools
 import math
 import os
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 from data_sync import load_draws
 
 
@@ -47,6 +48,53 @@ GAME_CONFIGS: Dict[str, GameConfig] = {
         jackpot_high_threshold_billion=100.0,
     ),
 }
+
+
+# --- Xoay vòng theo ngày (daily rotation) -------------------------------------
+# Engine vốn deterministic: với cùng 1 tập dữ liệu lịch sử, tổ hợp điểm cao nhất
+# luôn là một. Để tránh gửi lại đúng 1 vé mỗi ngày, ta chọn trong tập "gần tối ưu"
+# (cách điểm cao nhất không quá ROTATION_EPSILON) bằng một hash ổn định theo ngày.
+# Cùng 1 ngày -> cùng 1 lựa chọn; sang ngày khác -> lựa chọn có thể đổi, nhưng vẫn
+# nằm trong vùng điểm gần tốt nhất. Có thể loại thêm các vé đã phát gần đây.
+ROTATION_EPSILON = 0.15
+_OWNER_SALT = os.environ.get("GITHUB_REPOSITORY_OWNER", "proboy172").strip().lower()
+
+
+def ticket_key(ticket: List[int]) -> str:
+    """Khoá canon cho 1 bộ số (dùng để so sánh/loại trừ lặp)."""
+    return " ".join(f"{n:02d}" for n in sorted(int(x) for x in ticket))
+
+
+def daily_rotation_key(stats: dict, candidate_key: str) -> bytes:
+    """Hash ổn định theo (ngày, chủ sở hữu, tổ hợp) - không dùng random."""
+    day = str(stats.get("target_date") or datetime.date.today().isoformat())
+    raw = f"{day}|{_OWNER_SALT}|{candidate_key}".encode("utf-8")
+    return hashlib.sha256(raw).digest()
+
+
+def _pick_daily_best(candidates: List[Tuple], stats: dict,
+                     key_func=None, epsilon: float = ROTATION_EPSILON) -> Tuple:
+    """
+    Chọn 1 candidate từ tập gần tối ưu.
+    - candidates: phần tử đầu tiên là điểm số (float), phần tử còn lại là dữ liệu.
+    - key_func(candidate) -> khoá canon để hash theo ngày.
+    - epsilon: chỉ xét các candidate có điểm >= best - epsilon.
+    - stats["exclude_ticket_keys"] (tuỳ chọn): loại các tổ hợp đã phát gần đây.
+    """
+    if not candidates:
+        raise ValueError("Không có candidate hợp lệ để chọn.")
+    best_score = max(float(c[0]) for c in candidates)
+    near = [c for c in candidates if float(c[0]) >= best_score - epsilon]
+    excluded: Set[str] = set(stats.get("exclude_ticket_keys") or set())
+    if excluded:
+        key_fn = key_func or (lambda c: ticket_key(c[1]))
+        fresh = [c for c in near if key_fn(c) not in excluded]
+        if fresh:
+            near = fresh
+    if len(near) == 1:
+        return near[0]
+    key_fn = key_func or (lambda c: ticket_key(c[1]))
+    return max(near, key=lambda c: daily_rotation_key(stats, key_fn(c)))
 
 
 def compute_ac_value(ticket: List[int]) -> int:
@@ -117,7 +165,9 @@ def check_morphology_filter(ticket: List[int], cfg: GameConfig, strict: bool = T
     return passed, metrics
 
 
-def analyze_historical_stats(game_code: str, draws_subset: List[dict] = None) -> dict:
+def analyze_historical_stats(game_code: str, draws_subset: List[dict] = None,
+                             target_date: Optional[str] = None,
+                             exclude_ticket_keys: Optional[List[str]] = None) -> dict:
     """
     Lõi Phân tích Định lượng 5 Chiều (5D Quantitative & Markov Engine):
     1. Kiểm định Chi-Square (Goodness-of-Fit)
@@ -129,6 +179,10 @@ def analyze_historical_stats(game_code: str, draws_subset: List[dict] = None) ->
     cfg = GAME_CONFIGS[game_code]
     draws = draws_subset if draws_subset is not None else load_draws(game_code)
     n_draws = len(draws)
+    # Ngày mục tiêu dùng cho daily rotation. Mặc định là ngày hiện tại (UTC+7).
+    target_date_str = str(target_date) if target_date else datetime.datetime.now(
+        datetime.timezone(datetime.timedelta(hours=7))
+    ).date().isoformat()
     max_b = cfg.max_ball
 
     freq_all = {b: 0 for b in range(1, max_b + 1)}
@@ -234,6 +288,8 @@ def analyze_historical_stats(game_code: str, draws_subset: List[dict] = None) ->
     return {
         "config": cfg,
         "total_draws": n_draws,
+        "target_date": target_date_str,
+        "exclude_ticket_keys": set(exclude_ticket_keys or []),
         "latest_draw": draws[-1],
         "expected_freq": round(expected_freq, 2),
         "chi_square": round(chi_sq, 2),
@@ -329,33 +385,25 @@ def generate_1_ticket_optimal(stats: dict) -> dict:
     cfg: GameConfig = stats["config"]
     candidate_pool = select_stratified_candidates(stats, pool_size=14)
 
-    best_ticket = None
-    best_score = -1e9
-    best_metrics = {}
-    valid_count = 0
-
+    valid_candidates = []
     for combo in itertools.combinations(candidate_pool, 6):
         ticket = sorted(combo)
         passed, metrics = check_morphology_filter(ticket, cfg, strict=True)
         if not passed:
             continue
-        valid_count += 1
-        sc = score_single_ticket(ticket, stats)
-        if sc > best_score:
-            best_score = sc
-            best_ticket = ticket
-            best_metrics = metrics
+        valid_candidates.append((score_single_ticket(ticket, stats), ticket, metrics))
 
-    if best_ticket is None:
+    if not valid_candidates:
         for combo in itertools.combinations(candidate_pool, 6):
             ticket = sorted(combo)
             passed, metrics = check_morphology_filter(ticket, cfg, strict=False)
             if passed:
-                sc = score_single_ticket(ticket, stats)
-                if sc > best_score:
-                    best_score = sc
-                    best_ticket = ticket
-                    best_metrics = metrics
+                valid_candidates.append((score_single_ticket(ticket, stats), ticket, metrics))
+
+    valid_count = len(valid_candidates)
+    best_score, best_ticket, best_metrics = _pick_daily_best(
+        valid_candidates, stats, key_func=lambda c: ticket_key(c[1])
+    )
 
     sms_syntax = f"{cfg.code} K1 S " + " ".join(f"{n:02d}" for n in best_ticket)
     return {
@@ -404,23 +452,21 @@ def generate_2_tickets_diversity_optimal(stats: dict) -> dict:
                 valid_candidates.append((sc, ticket, metrics))
 
     valid_candidates.sort(key=lambda x: x[0], reverse=True)
-    best_t1 = valid_candidates[0]
+    best_t1 = _pick_daily_best(valid_candidates, stats, key_func=lambda c: ticket_key(c[1]))
 
     # Tìm Vé 2 thỏa mãn overlap lý tưởng 2-3 số để mở rộng diện tích bảo hiểm
-    best_t2 = None
-    best_pair_joint_score = -1e9
+    pair_candidates = []
     for item in valid_candidates[1:60]:
         sc, tk, met = item
         overlap = len(set(best_t1[1]).intersection(tk))
         if overlap in (2, 3):
             # Thưởng cho việc mở rộng không gian số mà vẫn bảo tồn điểm quant cao
             joint_score = best_t1[0] + sc + (3 - overlap) * 0.15
-            if joint_score > best_pair_joint_score:
-                best_pair_joint_score = joint_score
-                best_t2 = item
+            pair_candidates.append((joint_score, tk, met))
 
-    if best_t2 is None:
-        best_t2 = valid_candidates[1]
+    best_t2 = (_pick_daily_best(pair_candidates, stats, key_func=lambda c: ticket_key(c[1]),
+                                epsilon=0.10)
+               if pair_candidates else valid_candidates[1])
 
     tickets = [
         {
@@ -513,10 +559,7 @@ def generate_3_tickets_abbreviated_wheel(stats: dict) -> dict:
     """
     cfg: GameConfig = stats["config"]
     stratified_12 = select_stratified_candidates(stats, pool_size=12)
-    best_pool_9 = None
-    best_wheel_tickets = None
-    best_wheel_blocks = None
-    best_wheel_score = -1e9
+    wheel_candidates = []
 
     for pool_9 in itertools.combinations(stratified_12, 9):
         pool_9 = sorted(pool_9)
@@ -549,15 +592,25 @@ def generate_3_tickets_abbreviated_wheel(stats: dict) -> dict:
                 s3 = score_single_ticket(t3, stats)
                 total_w_score = (s1 + s2 + s3) + strict_pass_count * 3.0
 
-                if total_w_score > best_wheel_score:
-                    best_wheel_score = total_w_score
-                    best_pool_9 = pool_9
-                    best_wheel_blocks = {"A": block_a, "B": block_b, "C": block_c}
-                    best_wheel_tickets = [
+                wheel_candidates.append((
+                    total_w_score,
+                    pool_9,
+                    {"A": block_a, "B": block_b, "C": block_c},
+                    [
                         (t1, s1, m1, "Cụm A + Cụm B"),
                         (t2, s2, m2, "Cụm A + Cụm C"),
                         (t3, s3, m3, "Cụm B + Cụm C"),
-                    ]
+                    ],
+                ))
+
+    if not wheel_candidates:
+        raise ValueError("Không tìm được dàn 3 vé hợp lệ cho ngày này.")
+    best_wheel_score, best_pool_9, best_wheel_blocks, best_wheel_tickets = _pick_daily_best(
+        wheel_candidates,
+        stats,
+        key_func=lambda c: ticket_key(c[3][0][0]),
+        epsilon=0.20,
+    )
 
     tickets_out = []
     sms_list = []

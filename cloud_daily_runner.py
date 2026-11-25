@@ -22,6 +22,7 @@ from quant_engine import (
     generate_2_tickets_diversity_optimal,
     generate_3_tickets_abbreviated_wheel,
     generate_dynamic_quant_plan,
+    ticket_key,
 )
 
 # Outputs are PRIVATE (per-day SMS commands have value). Never publish to a public repo/URL.
@@ -29,6 +30,46 @@ from quant_engine import (
 OUT_DIR = Path(os.environ.get("VIETLOTT_OUT_DIR", str(BASE_DIR / "out" / "daily")))
 
 COST_PER_TICKET_VND = 10_000
+RECENT_STATE_PATH = BASE_DIR / "data" / "last_published.json"
+RECENT_WINDOW = 5  # loại các vé đã phát trong 5 ngày gần nhất
+
+
+def _load_recent_ticket_keys(avoid_recent: bool) -> List[str]:
+    """Đọc các tổ hợp đã phát gần đây để daily rotation không gửi lại vé cũ."""
+    if not avoid_recent or not RECENT_STATE_PATH.exists():
+        return []
+    try:
+        state = json.loads(RECENT_STATE_PATH.read_text(encoding="utf-8"))
+        entries = state.get("recent", [])[-RECENT_WINDOW:]
+        keys: List[str] = []
+        for entry in entries:
+            for sms in entry.get("sms_commands", []):
+                parts = sms.split()
+                if "S" in parts:
+                    nums = parts[parts.index("S") + 1:]
+                    if len(nums) == 6:
+                        keys.append(ticket_key([int(x) for x in nums]))
+        return keys
+    except Exception:
+        return []
+
+
+def _save_recent_ticket(sms_commands: List[str], report_date: str, avoid_recent: bool) -> None:
+    if not avoid_recent or not sms_commands:
+        return
+    try:
+        state = {"recent": []}
+        if RECENT_STATE_PATH.exists():
+            state = json.loads(RECENT_STATE_PATH.read_text(encoding="utf-8"))
+        recent = state.get("recent", [])
+        recent = [e for e in recent if e.get("date") != report_date]
+        recent.append({"date": report_date, "sms_commands": list(sms_commands)})
+        state["recent"] = recent[-RECENT_WINDOW:]
+        RECENT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        RECENT_STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:
+        # Lưu state thất bại không được làm hỏng bản phát hành
+        pass
 
 
 def fetch_live_jackpot_billion(game_code: str) -> float:
@@ -171,7 +212,8 @@ def _generate_ai_plan(stats: dict, mode: str, ticket_count: Optional[int], live_
 
 def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot: float = None,
                              out_dir: str | Path | None = None, write_files: bool = True,
-                             config: Optional[Dict[str, Any]] = None) -> dict:
+                             config: Optional[Dict[str, Any]] = None,
+                             sync_data: bool = True, avoid_recent: bool = False) -> dict:
     """
     Chay pipeline hang ngay (private): dong bo du lieu, tinh toan, sinh lenh SMS.
 
@@ -185,11 +227,21 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
         target_out.mkdir(parents=True, exist_ok=True)
 
     cfg_in = _normalize_config(config)
-    sync_vietlott_data()
+    if sync_data:
+        sync_vietlott_data()
 
     vn_tz = datetime.timezone(datetime.timedelta(hours=7))
-    today = force_date or datetime.datetime.now(vn_tz).date()
+    now_vn = datetime.datetime.now(vn_tz)
+    today = force_date or now_vn.date()
+    # Stale guard: không bao giờ phát hành lệnh mang ngày khác ngày hiện tại.
+    if write_files and str(today) != now_vn.date().isoformat():
+        raise ValueError(
+            f"STALE OUTPUT: ngày phát hành {today} != hôm nay {now_vn.date()}. "
+            "Từ chối ghi đè today_sms.txt/today_report.json."
+        )
     schedule_game = get_today_game_code(today)
+    exclude_keys = _load_recent_ticket_keys(avoid_recent)
+    latest_draw_date = None
 
     chosen_game = cfg_in.get("game", "auto")
     if chosen_game == "auto":
@@ -221,7 +273,12 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
                 live_jp = float(cfg_in["jackpot_override_billion"])
             except Exception:
                 pass
-        stats = analyze_historical_stats(game_code)
+        stats = analyze_historical_stats(
+            game_code,
+            target_date=str(today),
+            exclude_ticket_keys=exclude_keys,
+        )
+        latest_draw_date = (stats.get("latest_draw") or {}).get("date")
         mode = cfg_in.get("mode", "dynamic")
         ticket_count = cfg_in.get("ticket_count")
 
@@ -266,6 +323,10 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
         "tickets_detail": tickets_summary,
         "sensitive": True,
         "distribution": "licensed_device_api_only",
+        "generated_at": now_vn.isoformat(timespec="seconds"),
+        "rotation_date": str(today),
+        "latest_draw_date": latest_draw_date,
+        "avoided_recent_tickets": bool(avoid_recent),
         "config_applied": {k: v for k, v in cfg_in.items() if k in ("game", "mode", "ticket_count")},
     }
 
@@ -273,9 +334,13 @@ def run_daily_cloud_pipeline(force_date: datetime.date = None, override_jackpot:
         sms_txt_path = target_out / "today_sms.txt"
         report_json_path = target_out / "today_report.json"
         sms_txt_path.write_text("\n".join(all_sms_commands), encoding="utf-8")
+        date_txt_path = target_out / "today_date.txt"
+        date_txt_path.write_text(str(today), encoding="utf-8")
         report["output_sms_file"] = str(sms_txt_path)
         report["output_report_file"] = str(report_json_path)
+        report["output_date_file"] = str(date_txt_path)
         report_json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        _save_recent_ticket(all_sms_commands, str(today), avoid_recent)
 
     return report
 
@@ -287,6 +352,9 @@ if __name__ == "__main__":
     ap.add_argument("--jackpot", type=float, default=None, help="Override jackpot (billion VND) for testing")
     ap.add_argument("--config", default=None, help="JSON config (per-customer): game/mode/ticket_count/custom_tickets")
     ap.add_argument("--config-file", default=None, help="Path to JSON config file")
+    ap.add_argument("--force-date", default=None, help="YYYY-MM-DD (chỉ để test rotation; không dùng khi publish)")
+    ap.add_argument("--no-sync", action="store_true", help="Không tải lại dữ liệu lịch sử (dùng khi test offline)")
+    ap.add_argument("--avoid-recent", action="store_true", help="Không gửi lại vé đã phát trong 5 ngày gần nhất")
     args = ap.parse_args()
     cfg = None
     if args.config_file:
@@ -299,7 +367,16 @@ if __name__ == "__main__":
             cfg = json.loads(args.config)
         except Exception:
             cfg = cfg
-    result = run_daily_cloud_pipeline(override_jackpot=args.jackpot, out_dir=args.out_dir, write_files=not args.no_write, config=cfg)
+    forced = datetime.date.fromisoformat(args.force_date) if args.force_date else None
+    result = run_daily_cloud_pipeline(
+        force_date=forced,
+        override_jackpot=args.jackpot,
+        out_dir=args.out_dir,
+        write_files=not args.no_write,
+        config=cfg,
+        sync_data=not args.no_sync,
+        avoid_recent=args.avoid_recent,
+    )
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
