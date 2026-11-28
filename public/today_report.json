@@ -1,77 +1,77 @@
 {
-  "date": "2026-11-27",
+  "date": "2026-11-28",
   "status": "ACTIVE_BUY",
-  "primary_matrix_game": "Mega 6/45",
-  "detected_jackpot_billion": 12.0,
+  "primary_matrix_game": "Power 6/55",
+  "detected_jackpot_billion": 30.0,
   "total_cost_vnd": 20000,
-  "decision_summary": "[Mega 6/45] Tín hiệu XÁC SUẤT TỐT (Top3 Score=1.228, 0 bóng Overdue) -> Quyết định đầu tư 2 vé (20.000đ) để phân tán rủi ro, phủ 10 số. (Chi phi: 20,000d)",
+  "decision_summary": "[Power 6/55] Tín hiệu XÁC SUẤT TỐT (Top3 Score=1.203, 0 bóng Overdue) -> Quyết định đầu tư 2 vé (20.000đ) để phân tán rủi ro, phủ 9 số. (Chi phi: 20,000d)",
   "sms_commands": [
-    "645 K1 S 01 10 23 31 36 38",
-    "645 K1 S 01 14 20 23 40 45"
+    "655 K1 S 01 18 36 38 39 55",
+    "655 K1 S 05 18 20 36 39 50"
   ],
   "tickets_detail": [
     {
-      "game": "Mega 6/45",
+      "game": "Power 6/55",
       "detail": {
         "ticket_index": 1,
         "role": "Trục chính (Core Quant Anchor)",
         "numbers": [
           1,
-          10,
-          23,
-          31,
+          18,
           36,
-          38
+          38,
+          39,
+          55
         ],
-        "formatted": "01 10 23 31 36 38",
-        "quant_score": 8.1696,
+        "formatted": "01 18 36 38 39 55",
+        "quant_score": 8.1854,
         "metrics": {
-          "sum": 139,
+          "sum": 187,
           "odd_even": "3:3",
           "low_high": "2:4",
-          "ac_value": 9,
-          "anti_crowd_gt31": 2,
+          "ac_value": 8,
+          "anti_crowd_gt31": 4,
           "decades": 4,
-          "consec_pairs": 0,
+          "consec_pairs": 1,
           "unique_last_digits": 5
         },
-        "sms": "645 K1 S 01 10 23 31 36 38"
+        "sms": "655 K1 S 01 18 36 38 39 55"
       }
     },
     {
-      "game": "Mega 6/45",
+      "game": "Power 6/55",
       "detail": {
         "ticket_index": 2,
         "role": "Phân tán bù trừ (Diversity Hedge)",
         "numbers": [
-          1,
-          14,
+          5,
+          18,
           20,
-          23,
-          40,
-          45
+          36,
+          39,
+          50
         ],
-        "formatted": "01 14 20 23 40 45",
-        "quant_score": 8.2106,
+        "formatted": "05 18 20 36 39 50",
+        "quant_score": 8.27,
         "metrics": {
-          "sum": 143,
-          "odd_even": "3:3",
+          "sum": 168,
+          "odd_even": "2:4",
           "low_high": "3:3",
-          "ac_value": 9,
-          "anti_crowd_gt31": 2,
-          "decades": 4,
+          "ac_value": 10,
+          "anti_crowd_gt31": 3,
+          "decades": 5,
           "consec_pairs": 0,
           "unique_last_digits": 5
         },
-        "sms": "645 K1 S 01 14 20 23 40 45"
+        "sms": "655 K1 S 05 18 20 36 39 50"
       }
     }
   ],
   "sensitive": true,
   "distribution": "licensed_device_api_only",
-  "generated_at": "2026-11-27T21:39:07+07:00",
-  "rotation_date": "2026-11-27",
-  "latest_draw_date": "2026-11-27",
+  "generated_at": "2026-11-28T20:50:33+07:00",
+  "rotation_date": "2026-11-28",
+  "latest_draw_date": "2026-11-28",
   "avoided_recent_tickets": true,
   "config_applied": {
     "game": "auto",
